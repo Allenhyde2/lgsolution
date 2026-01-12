@@ -3,99 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>솔루션 개발 일정 최적화 버전</title>
+    <title>솔루션 개발 일정 Final Compact</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; }
         
-        /* 테이블 기본 설정 */
-        table { border-collapse: collapse; width: 100%; }
-        th, td { vertical-align: middle; }
-        
-        /* 텍스트 줄바꿈 및 줄간격 제어 */
-        .text-content {
-            white-space: normal; /* 줄바꿈 허용 */
-            line-height: 1.2;    /* 줄간격 좁게 */
-            word-break: keep-all; /* 단어 단위 줄바꿈 */
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            table-layout: fixed; 
         }
 
-        /* Phase 구분선 (이중 실선) */
-        .phase-divider {
-            border-bottom: 3px double #94a3b8;
-        }
-
-        /* 일반 행 구분선 (아주 얇게) */
-        .row-divider {
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        /* Phase 셀 텍스트 (세로쓰기) */
-        .phase-cell {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            transform: rotate(180deg);
-            white-space: nowrap;
-            letter-spacing: 2px;
+        /* [핵심] 모든 셀의 기본 줄간격을 1로 설정하여 불필요한 공백 제거 */
+        td, th {
+            padding: 1px 4px; /* 좌우 4px, 상하 1px (극소) */
+            line-height: 1;   /* 줄 높이 100% (글자 크기만큼만 차지) */
+            vertical-align: middle;
             font-size: 11px;
         }
 
-        /* 간트 차트 바 */
-        .gantt-bar {
-            height: 14px; /* 바 높이 고정 */
-            border-radius: 2px;
-            margin-top: 1px;
-            margin-bottom: 1px;
-            transition: transform 0.2s;
+        /* 텍스트가 들어가는 셀만 가독성을 위해 살짝 줄간격 부여 */
+        .text-cell {
+            line-height: 1.15; /* 여러 줄일 때 최소한의 간격 */
+            word-break: keep-all;
         }
-        .gantt-bar:hover { transform: scaleY(1.2); }
+
+        /* 간트 차트 바: 텍스트 높이와 이질감이 없도록 높이 조정 */
+        .gantt-bar {
+            height: 8px; /* 텍스트 한 줄 높이(약 11~12px)보다 작게 설정하여 행 높이 영향 X */
+            border-radius: 2px;
+            width: 100%;
+        }
+
+        /* Phase 텍스트 세로 정렬 */
+        .phase-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            text-align: center;
+            font-size: 10px;
+            letter-spacing: 1px;
+            /* Flex를 사용하여 높이 꽉 채움 방지 */
+            display: inline-block; 
+        }
+
+        .border-r { border-right: 1px solid #e2e8f0; }
+        .border-b { border-bottom: 1px solid #e2e8f0; }
+        .border-double-b { border-bottom: 3px double #94a3b8; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 p-4">
+<body class="bg-gray-50 text-gray-900 p-4">
 
-    <div class="max-w-[1800px] mx-auto bg-white shadow-lg rounded-lg overflow-hidden border border-gray-300">
+    <div class="max-w-[1800px] mx-auto bg-white border border-gray-400 shadow-sm">
         <!-- Header -->
-        <div class="bg-slate-800 text-white px-4 py-2 flex justify-between items-center border-b border-slate-600 h-12">
-            <h1 class="text-base font-bold flex items-center gap-2">
-                📅 솔루션 개발 일정표 (Compact & Wrapping)
-            </h1>
-            <div class="flex gap-3 text-[11px] bg-slate-700 px-3 py-1 rounded">
-                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-blue-500 rounded-sm"></span><span class="text-blue-100">Dev A</span></div>
-                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-emerald-500 rounded-sm"></span><span class="text-emerald-100">Dev B</span></div>
+        <div class="bg-slate-800 text-white px-3 py-1.5 flex justify-between items-center h-8">
+            <h1 class="font-bold text-xs">📅 개발 일정 (Height Optimized)</h1>
+            <div class="flex gap-3 text-[10px]">
+                <div class="flex items-center gap-1"><span class="w-2 h-2 bg-blue-500 rounded-sm"></span>Dev A</div>
+                <div class="flex items-center gap-1"><span class="w-2 h-2 bg-emerald-500 rounded-sm"></span>Dev B</div>
             </div>
         </div>
 
-        <!-- Table -->
         <div class="overflow-x-auto">
-            <table class="text-xs">
-                <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-300">
-                    <!-- Column Headers -->
-                    <tr class="h-8">
-                        <th rowspan="2" class="border-r border-slate-300 w-8 bg-slate-200">Ph</th>
-                        <th rowspan="2" class="border-r border-slate-300 w-20 px-1">기능그룹</th>
-                        <th rowspan="2" class="border-r border-slate-300 min-w-[200px] px-2 text-left">상세 업무</th>
-                        <th rowspan="2" class="border-r border-slate-300 w-10">난이도</th>
-                        <th rowspan="2" class="border-r border-slate-300 w-14">담당</th>
-                        
-                        <!-- Month Labels -->
-                        <th colspan="4" class="border-r border-slate-300 bg-indigo-50 text-indigo-800 text-[10px]">Month 1</th>
-                        <th colspan="4" class="border-r border-slate-300 bg-pink-50 text-pink-800 text-[10px]">Month 2</th>
-                        <th colspan="4" class="bg-amber-50 text-amber-800 text-[10px]">Month 3</th>
+            <table>
+                <colgroup>
+                    <col style="width: 25px;"> <!-- Phase -->
+                    <col style="width: 70px;"> <!-- 그룹 -->
+                    <col style="width: auto;"> <!-- 상세 -->
+                    <col style="width: 35px;"> <!-- 난이도 -->
+                    <col style="width: 45px;"> <!-- 담당 -->
+                    <!-- 주차 (12개) -->
+                    <col span="12" style="width: 2.8%;">
+                </colgroup>
+
+                <thead class="bg-slate-100 text-slate-800 font-bold text-[10px] border-b border-slate-300">
+                    <tr class="h-6 bg-slate-200">
+                        <th rowspan="2" class="border-r border-slate-400">Ph</th>
+                        <th rowspan="2" class="border-r border-slate-400">그룹</th>
+                        <th rowspan="2" class="border-r border-slate-400 text-left">상세 업무</th>
+                        <th rowspan="2" class="border-r border-slate-400">난이도</th>
+                        <th rowspan="2" class="border-r border-slate-400">담당</th>
+                        <th colspan="4" class="border-r border-slate-400 bg-indigo-100 text-indigo-900">Month 1</th>
+                        <th colspan="4" class="border-r border-slate-400 bg-pink-100 text-pink-900">Month 2</th>
+                        <th colspan="4" class="bg-amber-100 text-amber-900">Month 3</th>
                     </tr>
-                    <!-- Week Labels -->
-                    <tr class="text-[9px] h-5">
-                        <th class="w-6 border-r border-slate-200 bg-indigo-50">1</th>
-                        <th class="w-6 border-r border-slate-200 bg-indigo-50">2</th>
-                        <th class="w-6 border-r border-slate-200 bg-indigo-50">3</th>
-                        <th class="w-6 border-r border-slate-300 bg-indigo-50">4</th>
-                        <th class="w-6 border-r border-slate-200 bg-pink-50">1</th>
-                        <th class="w-6 border-r border-slate-200 bg-pink-50">2</th>
-                        <th class="w-6 border-r border-slate-200 bg-pink-50">3</th>
-                        <th class="w-6 border-r border-slate-300 bg-pink-50">4</th>
-                        <th class="w-6 border-r border-slate-200 bg-amber-50">1</th>
-                        <th class="w-6 border-r border-slate-200 bg-amber-50">2</th>
-                        <th class="w-6 border-r border-slate-200 bg-amber-50">3</th>
-                        <th class="w-6 bg-amber-50">4</th>
+                    <tr class="h-4 bg-slate-50">
+                        <th class="border-r border-slate-300">1</th><th class="border-r border-slate-300">2</th><th class="border-r border-slate-300">3</th><th class="border-r border-slate-400">4</th>
+                        <th class="border-r border-slate-300">1</th><th class="border-r border-slate-300">2</th><th class="border-r border-slate-300">3</th><th class="border-r border-slate-400">4</th>
+                        <th class="border-r border-slate-300">1</th><th class="border-r border-slate-300">2</th><th class="border-r border-slate-300">3</th><th>4</th>
                     </tr>
                 </thead>
                 <tbody id="schedule-body"></tbody>
@@ -106,24 +102,22 @@
     <script>
         const phases = [
             {
-                id: "Phase 1",
-                desc: "기반",
+                id: "P1",
                 rows: [
                     { group: "공통/회원", task: "좋아요/팔로우, 컨텐츠 삭제/신고, 프로필 등록", difficulty: "하", dev: "Dev A", start: 1, duration: 1 },
-                    { group: "관리자(기초)", task: "메타데이터(태그/배지) 및 메인 배너 관리", difficulty: "하", dev: "Dev B", start: 1, duration: 1 },
+                    { group: "관리자", task: "메타데이터(태그/배지) 및 메인 배너 관리", difficulty: "하", dev: "Dev B", start: 1, duration: 1 },
                     { group: "마이홈", task: "활동정보, 작성글/팔로우 관리, 알림 설정 UI", difficulty: "하", dev: "Dev A", start: 2, duration: 1 },
-                    { group: "관리자(회원)", task: "크리에이터 관리, 신고/금칙어 설정", difficulty: "하", dev: "Dev B", start: 2, duration: 1 },
-                    { group: "조회", task: "매거진/스토리 상세/목록, 리뷰 목록 조회", difficulty: "하", dev: "Dev A", start: 3, duration: 1 },
-                    { group: "관리자(운영)", task: "인기 콘텐츠 큐레이션, 신고 게시물 처리", difficulty: "하", dev: "Dev B", start: 3, duration: 1 },
+                    { group: "관리자", task: "크리에이터 관리, 신고 회원/금칙어 설정", difficulty: "하", dev: "Dev B", start: 2, duration: 1 },
+                    { group: "조회", task: "매거진/스토리 상세 및 목록, 리뷰 목록 조회", difficulty: "하", dev: "Dev A", start: 3, duration: 1 },
+                    { group: "관리자", task: "인기 콘텐츠 큐레이션, 신고 게시물 처리", difficulty: "하", dev: "Dev B", start: 3, duration: 1 },
                     { group: "커뮤니티", task: "댓글/대댓글 CRUD, 리뷰 등록/수정", difficulty: "하", dev: "Dev A", start: 4, duration: 1 },
-                    { group: "관리자(조회)", task: "투표/Q&A 내역 조회, 관리자 알림 수신", difficulty: "하", dev: "Dev B", start: 4, duration: 1 }
+                    { group: "관리자", task: "투표/Q&A 내역 조회, 관리자 알림", difficulty: "하", dev: "Dev B", start: 4, duration: 1 }
                 ]
             },
             {
-                id: "Phase 2",
-                desc: "핵심",
+                id: "P2",
                 rows: [
-                    { group: "포스트", task: "포스트 CRUD (미디어 처리 포함), SNS 공유", difficulty: "상", dev: "Dev A", start: 5, duration: 1 },
+                    { group: "포스트", task: "포스트 CRUD (미디어 처리), SNS 공유", difficulty: "상", dev: "Dev A", start: 5, duration: 1 },
                     { group: "Q&A/투표", task: "Q&A/투표 로직(A/B), 포인트 정책 수립", difficulty: "상", dev: "Dev B", start: 5, duration: 1 },
                     { group: "메인/피드", task: "인기 콘텐츠 알고리즘, 개인화 목록 조회", difficulty: "상", dev: "Dev A", start: 6, duration: 1 },
                     { group: "포인트", task: "포인트 적립/사용 무결성, 이벤트 참여 로직", difficulty: "상", dev: "Dev B", start: 6, duration: 1 },
@@ -138,8 +132,7 @@
                 ]
             },
             {
-                id: "Phase 3",
-                desc: "완료",
+                id: "P3",
                 rows: [
                     { group: "QA", task: "통합 테스트, 시나리오 테스트, 버그 수정", difficulty: "중", dev: "공통", start: 11, duration: 1 },
                     { group: "배포", task: "프로덕션 배포, 모니터링 구축", difficulty: "중", dev: "공통", start: 12, duration: 1 }
@@ -154,48 +147,50 @@
             
             phase.rows.forEach((row, rowIndex) => {
                 const tr = document.createElement('tr');
-                // 마지막 행이 아니면 얇은 줄, Phase 끝이면 이중선
                 const isPhaseEnd = rowIndex === phase.rows.length - 1;
-                tr.className = isPhaseEnd && !isLastPhase ? 'phase-divider' : 'row-divider';
-                tr.className += " hover:bg-gray-50";
+                // 하단 보더 설정: Phase 끝이면 이중선, 아니면 일반선
+                tr.className = isPhaseEnd && !isLastPhase ? 'border-double-b' : 'border-b';
+                tr.className += " hover:bg-yellow-50";
 
                 // Lv1: Phase (Rowspan)
                 if (rowIndex === 0) {
                     const thPhase = document.createElement('td');
                     thPhase.rowSpan = phase.rows.length;
-                    thPhase.className = "p-0 border-r border-slate-300 text-center font-bold text-slate-600 bg-slate-50";
-                    thPhase.innerHTML = `<div class="phase-cell mx-auto h-full flex items-center justify-center">${phase.id}</div>`;
+                    thPhase.className = "border-r border-slate-300 bg-slate-100 text-center align-middle p-0";
+                    thPhase.innerHTML = `<span class="phase-text font-bold text-slate-500">${phase.id}</span>`;
                     tr.appendChild(thPhase);
                 }
 
                 // Lv2: Group
-                tr.innerHTML += `<td class="px-2 py-1 border-r border-slate-200 text-slate-700 text-[11px] leading-tight">${row.group}</td>`;
+                tr.innerHTML += `<td class="border-r border-slate-200 text-center font-medium text-slate-700 text-cell">${row.group}</td>`;
                 
-                // Lv3: Task (줄바꿈 허용, 줄간격 좁게)
-                tr.innerHTML += `<td class="px-2 py-1 border-r border-slate-200 text-slate-600 text-[11px] text-content leading-tight">${row.task}</td>`;
+                // Lv3: Task
+                tr.innerHTML += `<td class="border-r border-slate-200 text-slate-600 text-cell">${row.task}</td>`;
                 
                 // Lv4: Difficulty
-                let diffClass = row.difficulty === "상" ? "text-red-600 bg-red-50" : (row.difficulty === "중" ? "text-amber-600 bg-amber-50" : "text-blue-600 bg-blue-50");
-                tr.innerHTML += `<td class="p-0 border-r border-slate-200 text-center"><div class="py-1 text-[10px] ${diffClass} w-full h-full flex items-center justify-center">${row.difficulty}</div></td>`;
+                let diffClass = row.difficulty === "상" ? "text-red-600" : (row.difficulty === "중" ? "text-amber-600" : "text-blue-600");
+                tr.innerHTML += `<td class="border-r border-slate-200 text-center font-bold ${diffClass}">${row.difficulty}</td>`;
                 
                 // Lv5: Developer
                 let devColor = row.dev.includes("Dev A") ? "text-blue-600 font-bold" : (row.dev.includes("Dev B") ? "text-emerald-600 font-bold" : "text-gray-400");
-                tr.innerHTML += `<td class="p-0 border-r border-slate-300 text-center text-[10px] ${devColor}">${row.dev}</td>`;
+                // Dev A -> A로 축약하여 표시
+                let devName = row.dev.replace("Dev ", "");
+                tr.innerHTML += `<td class="border-r border-slate-300 text-center ${devColor}">${devName}</td>`;
 
                 // Gantt Chart Cells
                 for (let w = 1; w <= 12; w++) {
-                    let cellClass = "p-0 text-center border-r border-slate-100 relative";
-                    if (w % 4 === 0) cellClass = "p-0 text-center border-r border-slate-300 relative";
+                    let cellClass = "text-center p-0 align-middle"; // p-0 재강조
+                    let borderClass = (w % 4 === 0) ? "border-r border-slate-300" : "border-r border-slate-100";
                     
                     let content = "";
                     if (w >= row.start && w < row.start + row.duration) {
-                        let barColor = "bg-gray-400";
+                        let barColor = "bg-gray-300";
                         if (row.dev.includes("Dev A")) barColor = "bg-blue-500";
                         if (row.dev.includes("Dev B")) barColor = "bg-emerald-500";
-                        
-                        content = `<div class="gantt-bar w-full ${barColor} mx-auto"></div>`;
+                        // bar 높이 8px
+                        content = `<div class="gantt-bar ${barColor} mx-auto"></div>`;
                     }
-                    tr.innerHTML += `<td class="${cellClass} align-middle h-full">${content}</td>`;
+                    tr.innerHTML += `<td class="${cellClass} ${borderClass}">${content}</td>`;
                 }
                 tbody.appendChild(tr);
             });
