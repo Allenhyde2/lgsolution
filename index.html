@@ -3,59 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>솔루션 제공 기능 목록표 (Total 166)</title>
+    <title>솔루션 제공 기능 목록표 & WBS (Total 166)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; }
-        th { position: sticky; top: 0; z-index: 10; }
-        .highlight { background-color: #fef08a; } /* 검색 강조 색상 */
+        
+        /* 테이블 기본 스타일 */
+        table { border-collapse: separate; border-spacing: 0; width: 100%; }
+        td, th { 
+            border-right: 1px solid #cbd5e1; 
+            border-bottom: 1px solid #cbd5e1; 
+        }
+        th { border-top: 1px solid #cbd5e1; border-left: 1px solid #cbd5e1;} /* 헤더 테두리 보강 */
+        
+        /* 헤더 고정 (Sticky Header) */
+        thead { position: sticky; top: 0; z-index: 30; }
+        
+        /* 계층별 배경색 */
+        .col-l1 { background-color: #f8fafc; font-weight: 700; color: #1e40af; }
+        .col-l2 { background-color: #ffffff; font-weight: 600; color: #334155; }
+        .col-l3 { background-color: #f8fafc; color: #475569; }
+        
+        /* WBS 스타일 */
+        .wbs-cell { width: 24px; text-align: center; padding: 0; position: relative; }
+        .wbs-bar { height: 16px; border-radius: 4px; margin: 4px 1px; display: block; opacity: 0.9; }
+        .wbs-grid-line { border-right: 1px dashed #e2e8f0; }
+        
+        /* 스크롤바 */
+        ::-webkit-scrollbar { width: 12px; height: 12px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 6px; border: 2px solid #f1f1f1; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 p-6">
+<body class="bg-slate-100 text-gray-800 p-4 h-screen flex flex-col">
 
-    <div class="max-w-[1800px] mx-auto bg-white shadow-xl rounded-lg overflow-hidden flex flex-col h-[90vh]">
+    <div class="max-w-full mx-auto w-full bg-white shadow-xl rounded-lg overflow-hidden flex flex-col flex-1 border border-slate-300">
         <!-- Header -->
-        <div class="bg-slate-800 text-white p-5 flex justify-between items-center shrink-0">
-            <div>
-                <h1 class="text-xl font-bold">📋 솔루션 제공 기능 목록표</h1>
-                <p class="text-sm text-slate-400 mt-1">구글 시트 데이터 기반 전체 리스트 (총 <span id="total-count">0</span>개 항목)</p>
+        <div class="bg-slate-800 text-white p-4 shrink-0 z-40 relative shadow-md">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h1 class="text-xl font-bold flex items-center gap-2">
+                        <span>📅</span> 솔루션 구축 WBS (업무량 재조정)
+                    </h1>
+                    <p class="text-sm text-slate-400 mt-1">마이페이지(마이홈) → 개발 B로 이관 완료</p>
+                </div>
+                <!-- 범례 -->
+                <div class="text-xs text-slate-400 text-right flex gap-4 bg-slate-700 px-4 py-2 rounded-lg items-center">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded bg-blue-500 block"></span>
+                        <span>Phase 1 (하)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded bg-indigo-500 block"></span>
+                        <span>Phase 2 (중/상)</span>
+                    </div>
+                </div>
             </div>
-            <div class="flex gap-3">
-                <input type="text" id="searchInput" placeholder="키워드 검색 (예: 댓글, 포인트, Admin...)" 
-                    class="px-4 py-2 rounded text-slate-800 text-sm w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    onkeyup="filterTable()">
-                <button onclick="resetFilter()" class="bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded text-sm transition">초기화</button>
+
+            <!-- Dashboard: 업무량 분석 -->
+            <div class="bg-slate-700 rounded-lg p-3 flex gap-6 text-sm">
+                <!-- 개발 A 통계 -->
+                <div class="flex-1">
+                    <div class="flex justify-between mb-1">
+                        <span class="font-bold text-emerald-300">개발 A (서비스/커뮤니티)</span>
+                        <span id="dev-a-count" class="text-white">0건 (0%)</span>
+                    </div>
+                    <div class="w-full bg-slate-600 rounded-full h-2.5 mb-2 overflow-hidden">
+                        <div id="dev-a-bar" class="bg-emerald-500 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <div class="flex gap-2 text-xs text-slate-400" id="dev-a-details">
+                        <!-- JS will populate -->
+                    </div>
+                </div>
+
+                <!-- 구분선 -->
+                <div class="w-px bg-slate-600"></div>
+
+                <!-- 개발 B 통계 -->
+                <div class="flex-1">
+                    <div class="flex justify-between mb-1">
+                        <span class="font-bold text-orange-300">개발 B (시스템/어드민/마이페이지)</span>
+                        <span id="dev-b-count" class="text-white">0건 (0%)</span>
+                    </div>
+                    <div class="w-full bg-slate-600 rounded-full h-2.5 mb-2 overflow-hidden">
+                        <div id="dev-b-bar" class="bg-orange-500 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <div class="flex gap-2 text-xs text-slate-400" id="dev-b-details">
+                        <!-- JS will populate -->
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Table Container -->
-        <div class="overflow-auto flex-1">
-            <table class="w-full text-sm border-collapse relative">
-                <thead class="bg-gray-100 text-gray-700 border-b-2 border-gray-300">
-                    <tr>
-                        <th class="p-3 border-r w-16 text-center bg-gray-100">No</th>
-                        <th class="p-3 border-r w-24 bg-gray-100">Level 1<br><span class="text-xs font-normal text-gray-500">시스템</span></th>
-                        <th class="p-3 border-r w-32 bg-gray-100">Level 2<br><span class="text-xs font-normal text-gray-500">주업무</span></th>
-                        <th class="p-3 border-r w-40 bg-gray-100">Level 3<br><span class="text-xs font-normal text-gray-500">화면/상세업무</span></th>
-                        <th class="p-3 border-r w-48 bg-gray-100">Level 4<br><span class="text-xs font-normal text-gray-500">단위프로세스</span></th>
-                        <th class="p-3 bg-gray-100 text-left">단위프로세스 상세 구현 설명</th>
+        <div class="overflow-auto flex-1 bg-white relative">
+            <table class="text-xs w-full min-w-[1600px]">
+                <thead class="bg-slate-100 text-slate-700 font-bold text-center">
+                    <!-- 헤더 1열: 기본정보 + 월(Month) -->
+                    <tr class="h-8">
+                        <th rowspan="2" class="w-10 bg-slate-100 sticky left-0 z-20 border-l">No</th>
+                        <th rowspan="2" class="w-20 bg-slate-100">Lv1<br>시스템</th>
+                        <th rowspan="2" class="w-24 bg-slate-100">Lv2<br>주업무</th>
+                        <th rowspan="2" class="w-32 bg-slate-100">Lv3<br>화면/업무</th>
+                        <th rowspan="2" class="w-40 bg-slate-100">Lv4<br>단위프로세스</th>
+                        <th rowspan="2" class="min-w-[200px] bg-slate-100">상세 설명</th>
+                        <th rowspan="2" class="w-20 bg-slate-100 text-blue-800">담당자</th>
+                        <th rowspan="2" class="w-16 bg-slate-100">난이도</th>
+                        
+                        <!-- WBS Month Header -->
+                        <th colspan="4" class="bg-blue-50 text-blue-700 border-l-2 border-l-slate-300">1개월차</th>
+                        <th colspan="4" class="bg-indigo-50 text-indigo-700 border-l-2 border-l-slate-300">2개월차</th>
+                        <th colspan="4" class="bg-purple-50 text-purple-700 border-l-2 border-l-slate-300">3개월차</th>
+                    </tr>
+                    <!-- 헤더 2열: 주차(Week) -->
+                    <tr class="h-6 text-[10px] text-slate-500">
+                        <!-- Month 1 Weeks -->
+                        <th class="w-8 bg-blue-50/50 border-l-2 border-l-slate-300">1주</th>
+                        <th class="w-8 bg-blue-50/50">2주</th>
+                        <th class="w-8 bg-blue-50/50">3주</th>
+                        <th class="w-8 bg-blue-50/50">4주</th>
+                        <!-- Month 2 Weeks -->
+                        <th class="w-8 bg-indigo-50/50 border-l-2 border-l-slate-300">5주</th>
+                        <th class="w-8 bg-indigo-50/50">6주</th>
+                        <th class="w-8 bg-indigo-50/50">7주</th>
+                        <th class="w-8 bg-indigo-50/50">8주</th>
+                        <!-- Month 3 Weeks -->
+                        <th class="w-8 bg-purple-50/50 border-l-2 border-l-slate-300">9주</th>
+                        <th class="w-8 bg-purple-50/50">10주</th>
+                        <th class="w-8 bg-purple-50/50">11주</th>
+                        <th class="w-8 bg-purple-50/50">12주</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody" class="divide-y divide-gray-200">
-                    <!-- Javascript will load data here -->
+                <tbody id="tableBody">
+                    <!-- JS Rendering -->
                 </tbody>
             </table>
         </div>
         
         <!-- Footer -->
-        <div class="bg-gray-50 p-3 text-xs text-right text-gray-500 border-t shrink-0">
-            데이터 출처: 공유된 구글 스프레드시트 (20260112_솔루션제공기능목록표)
+        <div class="bg-slate-50 p-3 text-xs flex justify-between text-slate-500 border-t border-slate-300 shrink-0">
+            <span>* 좌측 테이블은 Lv1~Lv3 기준으로 자동 병합됩니다.</span>
+            <span>* 개발 A: 사용자 기능 위주 / 개발 B: 관리자 및 시스템 코어, 마이페이지 기능 배정</span>
         </div>
     </div>
 
     <script>
-        // 실제 구글 시트 데이터 (1~166번)
         const rawData = [
             {no:1, l1:"User", l2:"외부 시스템 연동", l3:"SNS 공유하기", l4:"SNS 공유하기(FE)", desc:"SNS 플랫폼(인스타그램) 공유하기 API를 연동한다."},
             {no:2, l1:"User", l2:"배치", l3:"포인트", l4:"포인트 소멸", desc:"포인트 소멸 배치 모듈을 개발한다."},
@@ -226,55 +320,255 @@
         ];
 
         const tableBody = document.getElementById('tableBody');
-        const totalCount = document.getElementById('total-count');
 
-        // 테이블 렌더링 함수
-        function renderTable(data) {
-            tableBody.innerHTML = '';
-            totalCount.textContent = data.length;
-
-            if(data.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">검색 결과가 없습니다.</td></tr>`;
-                return;
+        // 담당자 배정 로직 (Rule Based)
+        function assignDeveloper(item) {
+            // 개발 B (시스템/백엔드 코어/관리자) + 마이페이지(마이홈)
+            if (item.l1 === 'Admin' || 
+                item.l2.includes('배치') || 
+                item.l2.includes('봇') || 
+                item.l3.includes('포인트') || 
+                item.l2.includes('외부') || 
+                item.l2.includes('퀘스트') ||
+                item.l2.includes('마이홈')) {
+                return '개발 B';
             }
+            // 개발 A (서비스/프론트엔드/커뮤니티)
+            return '개발 A';
+        }
+
+        // 난이도 자동 분석 함수
+        function calculateDifficulty(item) {
+            if (item.l2.includes("배치") || 
+                item.l2.includes("봇 관리") || 
+                (item.l2.includes("퀘스트") && (item.l4.includes("검증") || item.l4.includes("지급")))) {
+                return '상';
+            }
+            if (
+                (item.l3.includes("포인트") && (item.l4.includes("적립") || item.l4.includes("사용") || item.l4.includes("소멸"))) ||
+                item.l2.includes("외부 시스템") ||
+                (item.l4.includes("등록") && !item.l3.includes("댓글") && !item.l3.includes("리뷰")) ||
+                item.l4.includes("프로필 등록") ||
+                item.l4.includes("신고") ||
+                item.l4.includes("승인/취소") ||
+                item.l4.includes("공유하기")
+            ) {
+                return '중';
+            }
+            return '하';
+        }
+
+        const difficultyStyles = {
+            '상': 'bg-indigo-100 text-indigo-700 font-bold',
+            '중': 'bg-indigo-50 text-indigo-600 font-medium',
+            '하': 'bg-blue-50 text-blue-600'
+        };
+
+        const barColors = {
+            '상': 'bg-indigo-600',
+            '중': 'bg-indigo-400',
+            '하': 'bg-blue-400'
+        };
+
+        const devStyles = {
+            '개발 A': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+            '개발 B': 'bg-orange-100 text-orange-700 border-orange-200'
+        };
+
+        // 통계 계산 및 표시 함수
+        function updateDashboard(data) {
+            let stats = {
+                '개발 A': { count: 0, high: 0, med: 0, low: 0 },
+                '개발 B': { count: 0, high: 0, med: 0, low: 0 }
+            };
 
             data.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-50 transition-colors";
-                tr.innerHTML = `
-                    <td class="p-3 border-r text-center text-gray-500">${item.no}</td>
-                    <td class="p-3 border-r font-medium text-blue-700">${item.l1}</td>
-                    <td class="p-3 border-r text-gray-700">${item.l2}</td>
-                    <td class="p-3 border-r text-gray-700">${item.l3}</td>
-                    <td class="p-3 border-r font-medium text-gray-800">${item.l4}</td>
-                    <td class="p-3 text-gray-600">${item.desc}</td>
-                `;
-                tableBody.appendChild(tr);
+                const dev = assignDeveloper(item);
+                const diff = calculateDifficulty(item);
+                
+                stats[dev].count++;
+                if(diff === '상') stats[dev].high++;
+                else if(diff === '중') stats[dev].med++;
+                else stats[dev].low++;
             });
+
+            const total = data.length;
+            const aPercent = Math.round((stats['개발 A'].count / total) * 100);
+            const bPercent = Math.round((stats['개발 B'].count / total) * 100);
+
+            // Update DOM
+            document.getElementById('dev-a-count').textContent = `${stats['개발 A'].count}건 (${aPercent}%)`;
+            document.getElementById('dev-a-bar').style.width = `${aPercent}%`;
+            document.getElementById('dev-a-details').innerHTML = `
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-600"></span>상: ${stats['개발 A'].high}</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-400"></span>중: ${stats['개발 A'].med}</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-400"></span>하: ${stats['개발 A'].low}</span>
+            `;
+
+            document.getElementById('dev-b-count').textContent = `${stats['개발 B'].count}건 (${bPercent}%)`;
+            document.getElementById('dev-b-bar').style.width = `${bPercent}%`;
+            document.getElementById('dev-b-details').innerHTML = `
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-600"></span>상: ${stats['개발 B'].high}</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-400"></span>중: ${stats['개발 B'].med}</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-400"></span>하: ${stats['개발 B'].low}</span>
+            `;
         }
 
-        // 검색 필터 함수
-        function filterTable() {
-            const keyword = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = rawData.filter(item => {
-                return (
-                    item.l2.toLowerCase().includes(keyword) || 
-                    item.l3.toLowerCase().includes(keyword) || 
-                    item.l4.toLowerCase().includes(keyword) || 
-                    item.desc.toLowerCase().includes(keyword) ||
-                    item.l1.toLowerCase().includes(keyword)
-                );
+        // 데이터 정렬 및 Rowspan 계산 로직
+        function processPhaseData(items) {
+            items.sort((a, b) => {
+                if (a.l1 !== b.l1) return a.l1.localeCompare(b.l1);
+                if (a.l2 !== b.l2) return a.l2.localeCompare(b.l2);
+                if (a.l3 !== b.l3) return a.l3.localeCompare(b.l3);
+                return a.no - b.no;
             });
-            renderTable(filtered);
+
+            const processed = [];
+            for (let i = 0; i < items.length; i++) {
+                const item = { ...items[i], l1Span: 1, l2Span: 1, l3Span: 1 };
+                
+                if (i > 0 && items[i].l1 === items[i-1].l1) {
+                    item.l1Span = 0;
+                } else {
+                    let count = 1;
+                    for (let j = i + 1; j < items.length; j++) {
+                        if (items[j].l1 === item.l1) count++; else break;
+                    }
+                    item.l1Span = count;
+                }
+
+                if (i > 0 && items[i].l2 === items[i-1].l2 && items[i].l1 === items[i-1].l1) {
+                    item.l2Span = 0;
+                } else {
+                    let count = 1;
+                    for (let j = i + 1; j < items.length; j++) {
+                        if (items[j].l2 === item.l2 && items[j].l1 === item.l1) count++; else break;
+                    }
+                    item.l2Span = count;
+                }
+
+                if (i > 0 && items[i].l3 === items[i-1].l3 && items[i].l2 === items[i-1].l2 && items[i].l1 === items[i-1].l1) {
+                    item.l3Span = 0;
+                } else {
+                    let count = 1;
+                    for (let j = i + 1; j < items.length; j++) {
+                        if (items[j].l3 === item.l3 && items[j].l2 === item.l2 && items[j].l1 === item.l1) count++; else break;
+                    }
+                    item.l3Span = count;
+                }
+                processed.push(item);
+            }
+            return processed;
         }
 
-        // 초기화
-        function resetFilter() {
-            document.getElementById('searchInput').value = '';
-            renderTable(rawData);
+        // 일정 시뮬레이션 함수
+        function simulateSchedule(item, index) {
+            let start, duration;
+            const seed = (item.no * 7 + index * 13) % 100;
+            
+            if (item.difficulty === '하') {
+                start = (seed % 6) + 1; 
+                duration = (seed % 3) + 1; 
+            } else {
+                start = (seed % 7) + 5; 
+                duration = (seed % 4) + 2;
+            }
+            if (start + duration > 13) duration = 13 - start;
+            return { start, duration };
         }
 
-        // 초기 렌더링
+        function renderTable(data) {
+            tableBody.innerHTML = '';
+            
+            // 통계 업데이트 호출
+            updateDashboard(data);
+
+            let phase1 = [];
+            let phase2 = [];
+
+            data.forEach(item => {
+                const diff = calculateDifficulty(item);
+                const dev = assignDeveloper(item); // 담당자 배정
+                const itemWithMeta = { ...item, difficulty: diff, assignee: dev };
+
+                if (diff === '하') phase1.push(itemWithMeta);
+                else phase2.push(itemWithMeta);
+            });
+
+            phase1 = processPhaseData(phase1);
+            phase2 = processPhaseData(phase2);
+
+            const renderRows = (items) => {
+                items.forEach((item, idx) => {
+                    const badgeStyle = difficultyStyles[item.difficulty];
+                    const barColor = barColors[item.difficulty];
+                    const devBadge = devStyles[item.assignee];
+                    const schedule = simulateSchedule(item, idx);
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition-colors bg-white group";
+                    
+                    let html = `<td class="p-2 text-center text-slate-500 bg-slate-50 border-r text-xs sticky left-0 z-10 border-l group-hover:bg-slate-100">${item.no}</td>`;
+                    
+                    if (item.l1Span > 0) html += `<td class="p-2 text-center col-l1 align-middle text-xs border-r" rowspan="${item.l1Span}">${item.l1}</td>`;
+                    if (item.l2Span > 0) html += `<td class="p-2 text-center col-l2 align-middle text-xs border-r" rowspan="${item.l2Span}">${item.l2}</td>`;
+                    if (item.l3Span > 0) html += `<td class="p-2 col-l3 align-middle pl-3 text-xs border-r" rowspan="${item.l3Span}">${item.l3}</td>`;
+                    
+                    html += `
+                        <td class="p-2 font-medium text-slate-800 bg-white border-r text-xs whitespace-nowrap overflow-hidden text-ellipsis max-w-[160px]" title="${item.l4}">${item.l4}</td>
+                        <td class="p-2 text-slate-600 bg-white border-r text-xs whitespace-nowrap overflow-hidden text-ellipsis max-w-[240px]" title="${item.desc}">${item.desc}</td>
+                        <td class="p-2 text-center bg-white border-r">
+                            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${devBadge}">
+                                ${item.assignee}
+                            </span>
+                        </td>
+                        <td class="p-2 text-center bg-white border-r">
+                            <span class="inline-block px-2 py-0.5 rounded text-[10px] ${badgeStyle}">
+                                ${item.difficulty}
+                            </span>
+                        </td>
+                    `;
+
+                    // WBS Cells (1~12주)
+                    for (let w = 1; w <= 12; w++) {
+                        let cellContent = "";
+                        let cellClass = "wbs-cell border-r border-slate-100 wbs-grid-line";
+                        
+                        if (w % 4 === 0) cellClass = "wbs-cell border-r border-slate-300";
+
+                        if (w >= schedule.start && w < schedule.start + schedule.duration) {
+                            cellContent = `<span class="wbs-bar ${barColor} shadow-sm" title="${w}주차 진행 (${item.assignee})"></span>`;
+                        }
+                        
+                        html += `<td class="${cellClass}">${cellContent}</td>`;
+                    }
+
+                    tr.innerHTML = html;
+                    tableBody.appendChild(tr);
+                });
+            };
+
+            // Phase 1 Header
+            if (phase1.length > 0) {
+                const headerRow1 = document.createElement('tr');
+                headerRow1.innerHTML = `<td colspan="20" class="p-2 font-bold text-sm text-white bg-blue-600 text-left pl-5 sticky left-0 z-10">🚀 Phase 1 - 핵심 기반 구축 (난이도: 하) - ${phase1.length}건</td>`;
+                tableBody.appendChild(headerRow1);
+                renderRows(phase1);
+            }
+
+            // Phase 2 Header
+            if (phase2.length > 0) {
+                const spacerRow = document.createElement('tr');
+                spacerRow.innerHTML = `<td colspan="20" class="h-4 bg-slate-200 border-none sticky left-0 z-10"></td>`;
+                tableBody.appendChild(spacerRow);
+
+                const headerRow2 = document.createElement('tr');
+                headerRow2.innerHTML = `<td colspan="20" class="p-2 font-bold text-sm text-white bg-indigo-600 text-left pl-5 sticky left-0 z-10">⚡ Phase 2 - 서비스 고도화 (난이도: 중/상) - ${phase2.length}건</td>`;
+                tableBody.appendChild(headerRow2);
+                renderRows(phase2);
+            }
+        }
+
         renderTable(rawData);
 
     </script>
