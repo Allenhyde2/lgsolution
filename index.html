@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>솔루션 개발 일정 대시보드 V2</title>
+    <title>솔루션 개발 일정 Compact</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -14,17 +14,16 @@
         
         /* Phase 구분선 스타일 (이중 실선) */
         .phase-divider {
-            border-bottom: 4px double #cbd5e1; /* 이중 실선 */
+            border-bottom: 3px double #94a3b8; /* 이중 실선, 색상 진하게 */
         }
 
         /* 간트 차트 바 애니메이션 */
         .gantt-bar {
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             position: relative;
         }
         .gantt-bar:hover {
-            transform: scaleY(1.1);
-            filter: brightness(0.95);
+            transform: scaleY(1.2);
             z-index: 10;
         }
 
@@ -34,72 +33,71 @@
             text-orientation: mixed;
             transform: rotate(180deg);
             white-space: nowrap;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
+        }
+        
+        /* 툴팁 효과 */
+        .task-cell:hover {
+            color: #1e40af;
+            cursor: default;
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 p-8">
+<body class="bg-gray-50 text-gray-800 p-4">
 
-    <div class="max-w-[1800px] mx-auto bg-white shadow-2xl rounded-xl overflow-hidden border border-gray-200">
-        <!-- Header -->
-        <div class="bg-slate-800 text-white p-6 flex justify-between items-center border-b-4 border-slate-600">
-            <div>
-                <h1 class="text-2xl font-bold flex items-center gap-2">
-                    <span>📅</span> 솔루션 기능 개발 일정표 (WBS)
-                </h1>
-                <p class="text-slate-300 text-sm mt-1 ml-1">Phase 중심 개발 계획 | 총 12주 (3개월)</p>
-            </div>
+    <div class="max-w-[1800px] mx-auto bg-white shadow-lg rounded-lg overflow-hidden border border-gray-300">
+        <!-- Compact Header -->
+        <div class="bg-slate-800 text-white px-4 py-3 flex justify-between items-center border-b border-slate-600">
+            <h1 class="text-lg font-bold flex items-center gap-2">
+                <span>📅</span> 솔루션 기능 개발 일정표 (Compact View)
+            </h1>
             
             <!-- Legend -->
-            <div class="flex gap-6 text-sm bg-slate-700 px-4 py-2 rounded-lg">
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 bg-blue-500 rounded shadow"></span>
-                    <span class="font-medium text-blue-100">Dev A (Front/User)</span>
+            <div class="flex gap-4 text-xs bg-slate-700 px-3 py-1 rounded">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 bg-blue-500 rounded-sm"></span>
+                    <span class="text-blue-100">Dev A</span>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 bg-emerald-500 rounded shadow"></span>
-                    <span class="font-medium text-emerald-100">Dev B (Back/Admin)</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 bg-gray-400 rounded shadow"></span>
-                    <span class="text-gray-300">공통/기타</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-sm"></span>
+                    <span class="text-emerald-100">Dev B</span>
                 </div>
             </div>
         </div>
 
         <!-- Table Container -->
         <div class="overflow-x-auto">
-            <table class="w-full text-sm border-collapse">
-                <thead class="bg-slate-50 text-slate-700 font-bold border-b-2 border-slate-300">
-                    <!-- 1st Header Row: Columns and Month Groups -->
+            <table class="w-full text-xs border-collapse">
+                <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-300">
+                    <!-- 1st Header Row -->
                     <tr>
-                        <th rowspan="2" class="p-3 border-r border-slate-300 w-16 bg-slate-100">Lv1<br>Phase</th>
-                        <th rowspan="2" class="p-3 border-r border-slate-300 w-32">Lv2<br>기능 그룹</th>
-                        <th rowspan="2" class="p-3 border-r border-slate-300 min-w-[300px] text-left">Lv3<br>상세 업무 및 내역</th>
-                        <th rowspan="2" class="p-3 border-r border-slate-300 w-20">Lv4<br>난이도</th>
-                        <th rowspan="2" class="p-3 border-r border-slate-300 w-24">Lv5<br>담당자</th>
+                        <th rowspan="2" class="p-1 border-r border-slate-300 w-10 bg-slate-200">Lv1<br>Ph</th>
+                        <th rowspan="2" class="p-1 border-r border-slate-300 w-24">Lv2<br>그룹</th>
+                        <th rowspan="2" class="px-2 py-1 border-r border-slate-300 min-w-[300px] text-left">Lv3<br>상세 업무</th>
+                        <th rowspan="2" class="p-1 border-r border-slate-300 w-12">Lv4<br>난이도</th>
+                        <th rowspan="2" class="p-1 border-r border-slate-300 w-16">Lv5<br>담당</th>
                         
                         <!-- Month Headers -->
-                        <th colspan="4" class="p-2 border-r border-slate-300 bg-indigo-50 text-indigo-800 border-b border-indigo-200">Month 1 (기초/구조)</th>
-                        <th colspan="4" class="p-2 border-r border-slate-300 bg-pink-50 text-pink-800 border-b border-pink-200">Month 2 (핵심 로직)</th>
-                        <th colspan="4" class="p-2 bg-amber-50 text-amber-800 border-b border-amber-200">Month 3 (고도화/완료)</th>
+                        <th colspan="4" class="py-1 border-r border-slate-300 bg-indigo-50 text-indigo-800 border-b border-indigo-200">Month 1</th>
+                        <th colspan="4" class="py-1 border-r border-slate-300 bg-pink-50 text-pink-800 border-b border-pink-200">Month 2</th>
+                        <th colspan="4" class="py-1 bg-amber-50 text-amber-800 border-b border-amber-200">Month 3</th>
                     </tr>
                     <!-- 2nd Header Row: Weeks -->
-                    <tr class="text-xs">
-                        <th class="p-1 border-r border-slate-200 w-10 bg-indigo-50">1주</th>
-                        <th class="p-1 border-r border-slate-200 w-10 bg-indigo-50">2주</th>
-                        <th class="p-1 border-r border-slate-200 w-10 bg-indigo-50">3주</th>
-                        <th class="p-1 border-r border-slate-300 w-10 bg-indigo-50">4주</th>
+                    <tr class="text-[10px]">
+                        <th class="w-8 border-r border-slate-200 bg-indigo-50">1</th>
+                        <th class="w-8 border-r border-slate-200 bg-indigo-50">2</th>
+                        <th class="w-8 border-r border-slate-200 bg-indigo-50">3</th>
+                        <th class="w-8 border-r border-slate-300 bg-indigo-50">4</th>
                         
-                        <th class="p-1 border-r border-slate-200 w-10 bg-pink-50">1주</th>
-                        <th class="p-1 border-r border-slate-200 w-10 bg-pink-50">2주</th>
-                        <th class="p-1 border-r border-slate-200 w-10 bg-pink-50">3주</th>
-                        <th class="p-1 border-r border-slate-300 w-10 bg-pink-50">4주</th>
+                        <th class="w-8 border-r border-slate-200 bg-pink-50">1</th>
+                        <th class="w-8 border-r border-slate-200 bg-pink-50">2</th>
+                        <th class="w-8 border-r border-slate-200 bg-pink-50">3</th>
+                        <th class="w-8 border-r border-slate-300 bg-pink-50">4</th>
 
-                        <th class="p-1 border-r border-slate-200 w-10 bg-amber-50">1주</th>
-                        <th class="p-1 border-r border-slate-200 w-10 bg-amber-50">2주</th>
-                        <th class="p-1 border-r border-slate-200 w-10 bg-amber-50">3주</th>
-                        <th class="p-1 w-10 bg-amber-50">4주</th>
+                        <th class="w-8 border-r border-slate-200 bg-amber-50">1</th>
+                        <th class="w-8 border-r border-slate-200 bg-amber-50">2</th>
+                        <th class="w-8 border-r border-slate-200 bg-amber-50">3</th>
+                        <th class="w-8 bg-amber-50">4</th>
                     </tr>
                 </thead>
                 <tbody id="schedule-body">
@@ -107,60 +105,54 @@
                 </tbody>
             </table>
         </div>
-        
-        <div class="p-4 bg-gray-50 text-xs text-gray-500 border-t text-right">
-            * 난이도 '하': 1개월 내 완료 가능한 조회/CRUD 기능 &nbsp;|&nbsp; 난이도 '상': 복합 로직, 외부 연동, 대용량 처리가 필요한 기능
-        </div>
     </div>
 
     <script>
-        // Data Structure Organized by Phases
         const phases = [
             {
                 id: "Phase 1",
-                desc: "기반 구축",
+                desc: "기반",
                 rows: [
-                    { group: "공통/회원", task: "좋아요/팔로우/북마크 (8-11), 컨텐츠 신고/삭제 (12-13), 프로필 등록 (25)", difficulty: "하", dev: "Dev A", start: 1, duration: 1 },
-                    { group: "관리자(기초)", task: "메타데이터(태그/배지) 관리 (120-128), 메인 배너 관리 (129-131)", difficulty: "하", dev: "Dev B", start: 1, duration: 1 },
-                    { group: "마이홈", task: "활동정보, 내 컨텐츠, 팔로우 관리 (31-48), 알림 설정 UI (160)", difficulty: "하", dev: "Dev A", start: 2, duration: 1 },
-                    { group: "관리자(회원)", task: "크리에이터 관리 (102-103), 신고/금칙어 관리 (145-149)", difficulty: "하", dev: "Dev B", start: 2, duration: 1 },
-                    { group: "조회", task: "매거진/스토리 상세 및 목록 (50-58), 리뷰 목록 조회 (163)", difficulty: "하", dev: "Dev A", start: 3, duration: 1 },
-                    { group: "관리자(운영)", task: "인기 콘텐츠 큐레이션 (132-141), 신고 게시물 처리 (142-144)", difficulty: "하", dev: "Dev B", start: 3, duration: 1 },
-                    { group: "커뮤니티", task: "댓글/대댓글 CRUD (14-22), 리뷰 등록 (162)", difficulty: "하", dev: "Dev A", start: 4, duration: 1 },
-                    { group: "관리자(조회)", task: "투표/Q&A 내역 조회 (104-115), 관리자 알림 (161)", difficulty: "하", dev: "Dev B", start: 4, duration: 1 }
+                    { group: "공통/회원", task: "좋아요/팔로우, 컨텐츠 삭제/신고, 프로필 등록", difficulty: "하", dev: "Dev A", start: 1, duration: 1 },
+                    { group: "관리자(기초)", task: "메타데이터(태그/배지) 및 메인 배너 관리", difficulty: "하", dev: "Dev B", start: 1, duration: 1 },
+                    { group: "마이홈", task: "활동정보, 작성글/팔로우 관리, 알림 설정 UI", difficulty: "하", dev: "Dev A", start: 2, duration: 1 },
+                    { group: "관리자(회원)", task: "크리에이터 관리, 신고/금칙어 설정", difficulty: "하", dev: "Dev B", start: 2, duration: 1 },
+                    { group: "조회", task: "매거진/스토리 상세/목록, 리뷰 목록 조회", difficulty: "하", dev: "Dev A", start: 3, duration: 1 },
+                    { group: "관리자(운영)", task: "인기 콘텐츠 큐레이션, 신고 게시물 처리", difficulty: "하", dev: "Dev B", start: 3, duration: 1 },
+                    { group: "커뮤니티", task: "댓글/대댓글 CRUD, 리뷰 등록/수정", difficulty: "하", dev: "Dev A", start: 4, duration: 1 },
+                    { group: "관리자(조회)", task: "투표/Q&A 내역 조회, 관리자 알림 수신", difficulty: "하", dev: "Dev B", start: 4, duration: 1 }
                 ]
             },
             {
                 id: "Phase 2",
-                desc: "핵심 기능",
+                desc: "핵심",
                 rows: [
-                    { group: "포스트", task: "포스트 CRUD + 미디어 처리 (59-69), SNS 공유 (1)", difficulty: "상", dev: "Dev A", start: 5, duration: 1 },
-                    { group: "Q&A/투표", task: "Q&A 및 A/B 투표 집계 로직 (70-89), 포인트 정책 설계", difficulty: "상", dev: "Dev B", start: 5, duration: 1 },
-                    { group: "메인/피드", task: "인기 콘텐츠 집계 알고리즘 (26-30), 개인화 목록", difficulty: "상", dev: "Dev A", start: 6, duration: 1 },
-                    { group: "포인트", task: "포인트 적립/사용 무결성 처리 (6-7), 이벤트 참여 로직", difficulty: "상", dev: "Dev B", start: 6, duration: 1 },
-                    { group: "검색", task: "통합 검색 엔진(ES) 연동 및 필터링 (95-101)", difficulty: "상", dev: "Dev A", start: 7, duration: 1 },
-                    { group: "배치/알림", task: "투표/이벤트 종료 배치 (4-5), 관리자 이벤트 생성", difficulty: "상", dev: "Dev B", start: 7, duration: 1 },
-                    { group: "채팅(1)", task: "채팅방 생성, 참여자 관리, UI 구현 (150-152)", difficulty: "상", dev: "Dev A", start: 8, duration: 1 },
-                    { group: "퀘스트(1)", task: "퀘스트 생성 및 수행 조건 검증 엔진 (164-165)", difficulty: "상", dev: "Dev B", start: 8, duration: 1 },
-                    { group: "채팅(2)", task: "실시간 메시지 송수신(Socket), 채팅 신고 (153-157)", difficulty: "상", dev: "Dev A", start: 9, duration: 1 },
-                    { group: "퀘스트(2)", task: "리워드 자동 지급 시스템 (166), 커스텀 봇 연동 (158)", difficulty: "상", dev: "Dev B", start: 9, duration: 1 },
-                    { group: "봇/마무리", task: "신규 가입 봇 UI, UX 폴리싱 및 버그 수정", difficulty: "중", dev: "Dev A", start: 10, duration: 1 },
-                    { group: "안정화", task: "대용량 쿼리 튜닝, 인덱싱, 배치 안정화", difficulty: "중", dev: "Dev B", start: 10, duration: 1 }
+                    { group: "포스트", task: "포스트 CRUD (미디어 처리 포함), SNS 공유", difficulty: "상", dev: "Dev A", start: 5, duration: 1 },
+                    { group: "Q&A/투표", task: "Q&A 및 A/B 투표 로직, 포인트 정책 수립", difficulty: "상", dev: "Dev B", start: 5, duration: 1 },
+                    { group: "메인/피드", task: "인기 콘텐츠 알고리즘, 개인화 목록 조회", difficulty: "상", dev: "Dev A", start: 6, duration: 1 },
+                    { group: "포인트", task: "포인트 적립/사용 트랜잭션, 이벤트 참여", difficulty: "상", dev: "Dev B", start: 6, duration: 1 },
+                    { group: "검색", task: "통합 검색 엔진 연동, 카테고리/필터링 구현", difficulty: "상", dev: "Dev A", start: 7, duration: 1 },
+                    { group: "배치/알림", task: "투표/이벤트 종료 배치, 관리자 이벤트 생성", difficulty: "상", dev: "Dev B", start: 7, duration: 1 },
+                    { group: "채팅(1)", task: "채팅방 생성/설정, 참여자 목록 관리", difficulty: "상", dev: "Dev A", start: 8, duration: 1 },
+                    { group: "퀘스트(1)", task: "퀘스트 생성/조건 설정 엔진 구현", difficulty: "상", dev: "Dev B", start: 8, duration: 1 },
+                    { group: "채팅(2)", task: "실시간 메시지(Socket), 채팅 신고 처리", difficulty: "상", dev: "Dev A", start: 9, duration: 1 },
+                    { group: "퀘스트(2)", task: "리워드 자동 지급, 커스텀 봇 연동", difficulty: "상", dev: "Dev B", start: 9, duration: 1 },
+                    { group: "봇/마무리", task: "신규 가입 봇 UI, UX 개선", difficulty: "중", dev: "Dev A", start: 10, duration: 1 },
+                    { group: "안정화", task: "대용량 쿼리 튜닝, 인덱싱 최적화", difficulty: "중", dev: "Dev B", start: 10, duration: 1 }
                 ]
             },
             {
                 id: "Phase 3",
                 desc: "완료",
                 rows: [
-                    { group: "QA", task: "통합 테스트, 시나리오 테스트, 버그 헌팅", difficulty: "중", dev: "공통", start: 11, duration: 1 },
-                    { group: "배포", task: "프로덕션 배포, 모니터링 구축, 인수인계", difficulty: "중", dev: "공통", start: 12, duration: 1 }
+                    { group: "QA", task: "통합 테스트, 시나리오 테스트, 버그 수정", difficulty: "중", dev: "공통", start: 11, duration: 1 },
+                    { group: "배포", task: "프로덕션 배포, 모니터링 구축", difficulty: "중", dev: "공통", start: 12, duration: 1 }
                 ]
             }
         ];
 
         const tbody = document.getElementById('schedule-body');
 
-        // Render Loop
         phases.forEach((phase, phaseIndex) => {
             const isLastPhase = phaseIndex === phases.length - 1;
             
@@ -168,60 +160,54 @@
                 const tr = document.createElement('tr');
                 const isLastRow = rowIndex === phase.rows.length - 1;
                 
-                // Styling for divider
+                // 구분선 스타일 적용
                 if (isLastRow && !isLastPhase) {
                     tr.classList.add('phase-divider');
                 } else {
-                    tr.classList.add('border-b', 'border-gray-100');
+                    tr.classList.add('border-b', 'border-gray-200');
                 }
+                
+                tr.className += " hover:bg-yellow-50 transition-colors h-7"; // 행 높이 고정 (h-7)
 
-                tr.className += " hover:bg-gray-50 transition-colors";
-
-                // Lv1: Phase (Rowspan Logic)
+                // Lv1: Phase (Rowspan)
                 if (rowIndex === 0) {
                     const thPhase = document.createElement('td');
                     thPhase.rowSpan = phase.rows.length;
-                    thPhase.className = "p-2 border-r border-slate-300 text-center font-bold text-slate-600 bg-slate-50";
-                    thPhase.innerHTML = `<div class="phase-cell mx-auto h-full flex items-center justify-center">${phase.id}<br><span class="text-xs font-normal mt-2">${phase.desc}</span></div>`;
+                    thPhase.className = "p-0 border-r border-slate-300 text-center font-bold text-slate-600 bg-slate-100";
+                    thPhase.innerHTML = `<div class="phase-cell mx-auto h-full flex items-center justify-center text-[10px]">${phase.id}</div>`;
                     tr.appendChild(thPhase);
                 }
 
                 // Lv2: Group
-                tr.innerHTML += `<td class="p-3 border-r border-slate-200 font-medium text-slate-700">${row.group}</td>`;
+                tr.innerHTML += `<td class="px-2 py-1 border-r border-slate-200 text-slate-700 truncate font-medium">${row.group}</td>`;
                 
                 // Lv3: Task
-                tr.innerHTML += `<td class="p-3 border-r border-slate-200 text-slate-600 text-xs leading-relaxed">${row.task}</td>`;
+                tr.innerHTML += `<td class="px-2 py-1 border-r border-slate-200 text-slate-600 truncate task-cell" title="${row.task}">${row.task}</td>`;
                 
                 // Lv4: Difficulty
-                let diffColor = row.difficulty === "상" ? "bg-red-100 text-red-700 border-red-200" : 
-                               (row.difficulty === "중" ? "bg-amber-100 text-amber-700 border-amber-200" : "bg-blue-50 text-blue-700 border-blue-200");
-                tr.innerHTML += `<td class="p-3 border-r border-slate-200 text-center"><span class="px-2 py-1 rounded-full text-xs border ${diffColor}">${row.difficulty}</span></td>`;
+                let diffClass = row.difficulty === "상" ? "text-red-600 bg-red-50" : (row.difficulty === "중" ? "text-amber-600 bg-amber-50" : "text-blue-600 bg-blue-50");
+                tr.innerHTML += `<td class="p-0 border-r border-slate-200 text-center"><span class="block w-full py-1 ${diffClass}">${row.difficulty}</span></td>`;
                 
                 // Lv5: Developer
-                let devColor = row.dev.includes("Dev A") ? "text-blue-600 font-bold" : 
-                               (row.dev.includes("Dev B") ? "text-emerald-600 font-bold" : "text-gray-500 font-medium");
-                tr.innerHTML += `<td class="p-3 border-r border-slate-300 text-center text-xs ${devColor}">${row.dev}</td>`;
+                let devColor = row.dev.includes("Dev A") ? "text-blue-600 font-bold" : (row.dev.includes("Dev B") ? "text-emerald-600 font-bold" : "text-gray-400");
+                tr.innerHTML += `<td class="p-0 border-r border-slate-300 text-center text-[11px] ${devColor}">${row.dev}</td>`;
 
-                // Gantt Chart Cells (12 Weeks)
+                // Gantt Chart Cells
                 for (let w = 1; w <= 12; w++) {
-                    let cellClass = "p-1 text-center border-r border-slate-100 relative h-10";
-                    if (w % 4 === 0) cellClass = "p-1 text-center border-r border-slate-300 relative h-10"; // Month separator
+                    let cellClass = "p-0 text-center border-r border-slate-100 h-7 relative";
+                    if (w % 4 === 0) cellClass = "p-0 text-center border-r border-slate-300 h-7 relative"; 
                     
                     let content = "";
-                    
                     if (w >= row.start && w < row.start + row.duration) {
                         let barColor = "bg-gray-400";
-                        if (row.dev.includes("Dev A")) barColor = "bg-blue-500 shadow-blue-200";
-                        if (row.dev.includes("Dev B")) barColor = "bg-emerald-500 shadow-emerald-200";
+                        if (row.dev.includes("Dev A")) barColor = "bg-blue-500";
+                        if (row.dev.includes("Dev B")) barColor = "bg-emerald-500";
                         
-                        // Rounding corners based on duration
-                        let rounded = "rounded";
-                        content = `<div class="gantt-bar h-6 w-full ${barColor} ${rounded} shadow mx-auto"></div>`;
+                        // 바 높이를 h-3.5로 줄임
+                        content = `<div class="gantt-bar h-3.5 w-full ${barColor} mx-auto rounded-sm"></div>`;
                     }
-                    
-                    tr.innerHTML += `<td class="${cellClass}">${content}</td>`;
+                    tr.innerHTML += `<td class="${cellClass} align-middle">${content}</td>`;
                 }
-
                 tbody.appendChild(tr);
             });
         });
