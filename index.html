@@ -74,7 +74,7 @@
             background-color: white;
         }
 
-        /* Timeline Cell */
+        /* Timeline Cell Base */
         .timeline-cell {
             text-align: center;
             cursor: pointer;
@@ -83,14 +83,32 @@
         }
         
         .timeline-cell:hover {
-            background-color: #f0fdf4;
+            background-color: #f3f4f6;
         }
 
+        /* Timeline Cell Active States (Colors) */
+        /* Default Green */
         .timeline-cell.active {
             background-color: #d1fae5;
             color: #047857;
             font-weight: bold;
         }
+
+        /* Dev A - Blue */
+        .timeline-cell.dev-a.active {
+            background-color: #bfdbfe; /* blue-200 */
+            color: #1e3a8a; /* blue-900 */
+        }
+        
+        /* Dev B - Purple */
+        .timeline-cell.dev-b.active {
+            background-color: #e9d5ff; /* purple-200 */
+            color: #581c87; /* purple-900 */
+        }
+        
+        /* Hover states for colored cells */
+        .timeline-cell.dev-a:hover:not(.active) { background-color: #eff6ff; }
+        .timeline-cell.dev-b:hover:not(.active) { background-color: #faf5ff; }
 
         /* Column Widths & Styles */
         .col-lv1 { width: 80px; text-align: center; }
@@ -238,7 +256,6 @@
                 // 1. Preprocess: Normalize Lv1 (Phase) data
                 let lastPhase = "";
                 const scheduleData = rawData.map(row => {
-                    // If row[0] is empty, use lastPhase. If not, update lastPhase.
                     if (row[0] && row[0].trim() !== "") {
                         lastPhase = row[0];
                     } else {
@@ -248,7 +265,7 @@
                 });
 
                 // 2. Calculate Rowspans for Lv1
-                const rowspans = []; // Stores rowspan count at the start index of each group
+                const rowspans = [];
                 let currentPhase = "";
                 let count = 0;
                 let startIndex = 0;
@@ -289,33 +306,37 @@
                         td.contentEditable = "true";
                         tr.appendChild(td);
                     } else if (!currentPhase || row[0] !== currentPhase) {
-                        // Skip cell creation for merged rows
-                        // Logic check: We calculated rowspans based on contiguous groups.
-                        // So if rowspan[index] is undefined, it means this row is part of the previous group.
+                        // Skip merged
                     }
 
-                    // Lv2 ~ Lv5 (Columns 1 to 4 in 0-based index)
+                    // Determine assignee for this row (Lv5 is at index 4)
+                    const assignee = row[4]; 
+                    let assigneeClass = "";
+                    if (assignee.includes("Dev A")) assigneeClass = "dev-a";
+                    if (assignee.includes("Dev B")) assigneeClass = "dev-b";
+
+                    // Lv2 ~ Lv5 (Columns 1 to 4)
                     for (let i = 1; i < 5; i++) {
                         const td = document.createElement('td');
                         td.contentEditable = "true";
                         td.textContent = row[i];
                         
-                        if (i === 1) { // Lv2 style
+                        if (i === 1) { // Lv2
                              td.className = 'font-medium text-gray-900 bg-gray-50';
-                        } else if (i === 3 || i === 4) { // Lv4(Difficulty), Lv5(Assignee) style
+                        } else if (i === 3 || i === 4) { // Lv4, Lv5
                              td.className = 'text-center text-gray-700';
                              // Difficulty Color
                              if (i === 3 && row[i] === "상") td.classList.add("text-red-600", "font-medium");
-                             // Assignee Color Check
+                             // Assignee Text Color
                              if (i === 4) {
-                                if (row[i].includes("Dev A")) td.classList.add("text-blue-600", "font-medium");
-                                if (row[i].includes("Dev B")) td.classList.add("text-purple-600", "font-medium");
+                                if (assigneeClass === "dev-a") td.classList.add("text-blue-600", "font-medium");
+                                if (assigneeClass === "dev-b") td.classList.add("text-purple-600", "font-medium");
                              }
                         } else {
                              td.className = 'text-gray-700';
                         }
                         
-                        // Style placeholder for empty repetitive cells (Lv2)
+                        // Empty placeholder check
                         if (row[i] === "" && i === 1) {
                            td.style.backgroundColor = 'white';
                         }
@@ -326,7 +347,10 @@
                     const timelineData = row[5];
                     timelineData.forEach(isActive => {
                         const td = document.createElement('td');
-                        td.className = 'timeline-cell';
+                        
+                        // Add base class and specific assignee class
+                        td.className = 'timeline-cell ' + assigneeClass;
+                        
                         if (isActive) {
                             td.classList.add('active');
                             td.textContent = '■';
@@ -365,24 +389,12 @@
             // Rows
             const rows = document.querySelectorAll('#table-body tr');
             
-            // Need to track current phase for rows that don't have the phase cell (due to rowspan)
             let currentPhase = "";
 
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
                 let rowData = [];
-                let cellIndex = 0; // Tracks visual cell index in the TR
-
-                // We skip the row number (first child) in logic, but need to handle colspan offsets?
-                // Actually, cells collection includes row number.
-                
-                // Logic:
-                // 1. Row Num (skip)
-                // 2. Lv1 (Phase) - Might be missing if merged.
-                // 3. Lv2...
-                
-                // Detection strategy: Check if the first data cell has rowspan > 1 or check class.
-                // The first cell is row-num. Second cell is either Phase or Lv2 (if merged).
+                let cellIndex = 0; 
                 
                 const firstDataCell = cells[1];
                 let hasPhaseCell = firstDataCell.classList.contains('phase-cell');
@@ -390,23 +402,16 @@
                 if (hasPhaseCell) {
                     currentPhase = firstDataCell.innerText;
                     rowData.push(escapeCSV(currentPhase));
-                    cellIndex = 2; // Next is Lv2
+                    cellIndex = 2; 
                 } else {
-                    // Merged row, use currentPhase
                     rowData.push(escapeCSV(currentPhase));
-                    cellIndex = 1; // Next is Lv2 (which is cells[1])
+                    cellIndex = 1; 
                 }
 
                 // Push Lv2 ~ Lv5
                 for (let i = 0; i < 4; i++) {
                     rowData.push(escapeCSV(cells[cellIndex + i].innerText));
                 }
-                
-                // Push Timeline
-                // Timeline starts after Lv5.
-                // Lv1, Lv2, Lv3, Lv4, Lv5 -> 5 columns.
-                // If hasPhaseCell: cells[1]..cells[5] are data. Timeline starts at cells[6].
-                // If no PhaseCell: cells[1]..cells[4] are data. Timeline starts at cells[5].
                 
                 let timelineStartIndex = hasPhaseCell ? 6 : 5;
                 for (let i = timelineStartIndex; i < cells.length; i++) {
