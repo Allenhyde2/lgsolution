@@ -3,470 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>canD 솔루션 개발 일정표</title>
+    <title>솔루션 개발 일정 대시보드</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
-        
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f8f9fa;
-        }
-
-        /* Spreadsheet Grid Styles */
-        .sheet-container {
-            overflow: auto;
-            max-height: calc(100vh - 60px);
-            border: 1px solid #94a3b8; /* Main border darker */
-            background-color: white;
-            position: relative;
-        }
-
-        table {
-            border-collapse: separate;
-            border-spacing: 0;
-            min-width: 100%;
-            font-size: 13px;
-        }
-
-        /* Default Cell Borders - Darker for better visibility */
-        th, td {
-            border-right: 1px solid #cbd5e1; /* gray-300 */
-            border-bottom: 1px solid #cbd5e1; /* gray-300 */
-            padding: 4px 8px;
-            white-space: nowrap;
-            height: 32px;
-            box-sizing: border-box;
-        }
-
-        /* Header Styles */
-        th {
-            background-color: #f3f4f6;
-            color: #374151;
-            font-weight: 700; /* Bolder header text */
-            text-align: center;
-            position: sticky;
-            z-index: 20;
-            border-top: 1px solid #cbd5e1;
-        }
-
-        /* Sticky Headers Positioning */
-        thead tr:nth-child(1) th {
-            top: 0;
-            height: 32px;
-            border-bottom: 1px solid #94a3b8; /* Stronger separation between header rows */
-        }
-        
-        thead tr:nth-child(2) th {
-            top: 32px;
-            height: 32px;
-            border-bottom: 2px solid #64748b; /* Thick separator between header and body */
-        }
-
-        /* Fixed Left Border */
-        th:first-child, td:first-child {
-            border-left: 1px solid #cbd5e1;
-        }
-
-        /* Row Number Column */
-        .row-num {
-            background-color: #f1f5f9;
-            color: #64748b;
-            text-align: center;
-            width: 40px;
-            font-size: 11px;
-            user-select: none;
-            position: sticky;
-            left: 0;
-            z-index: 10;
-            border-right: 2px solid #cbd5e1; /* Distinction between row nums and data */
-        }
-
-        /* Phase Separator Style (Double Line) */
-        tr.phase-separator td {
-            border-bottom: 3px double #475569 !important; /* slate-600 double line */
-        }
-
-        /* Cell Interaction */
-        td[contenteditable="true"]:focus {
-            outline: 2px solid #10b981;
-            outline-offset: -2px;
-            background-color: white;
-            z-index: 5; /* Bring to front on focus */
-        }
-
-        /* Timeline Cell Base */
-        .timeline-cell {
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.1s;
-            width: 40px;
-            min-width: 40px;
-        }
-        
-        .timeline-cell:hover {
-            background-color: #e2e8f0;
-        }
-
-        /* Timeline Cell Active States */
-        .timeline-cell.active {
-            background-color: #d1fae5;
-            color: #047857;
-            font-weight: bold;
-            border: 1px solid #059669; /* Add border to active cells for clarity */
-        }
-        .timeline-cell.dev-a.active {
-            background-color: #bfdbfe;
-            color: #1e3a8a;
-            border: 1px solid #1d4ed8;
-        }
-        .timeline-cell.dev-b.active {
-            background-color: #e9d5ff;
-            color: #581c87;
-            border: 1px solid #7e22ce;
-        }
-        
-        .timeline-cell.dev-a:hover:not(.active) { background-color: #eff6ff; }
-        .timeline-cell.dev-b:hover:not(.active) { background-color: #faf5ff; }
-
-        /* Column Widths */
-        .col-lv1 { width: 80px; text-align: center; }
-        .col-lv2 { width: 120px; }
-        .col-lv3 { width: 250px; }
-        .col-lv4 { width: 80px; text-align: center; }
-        .col-lv5 { width: 100px; text-align: center; }
-        
-        .phase-cell {
-            background-color: #fff;
-            vertical-align: middle;
-            text-align: center;
-            font-weight: bold;
-            color: #111827;
-        }
-
-        #loading-message {
-            display: flex; justify-content: center; align-items: center; height: 200px; color: #4b5563; font-weight: 500;
-        }
-        .hidden { display: none; }
+        body { font-family: 'Noto Sans KR', sans-serif; }
+        .gantt-cell { transition: all 0.2s; }
+        .gantt-cell:hover { transform: scale(1.05); }
+        .table-header { position: sticky; top: 0; z-index: 10; }
     </style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden text-gray-800">
+<body class="bg-gray-50 text-gray-800 p-6">
 
-    <!-- Toolbar -->
-    <header class="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between shadow-sm z-30 h-[60px]">
-        <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-green-600 rounded flex items-center justify-center text-white font-bold text-lg">S</div>
+    <div class="max-w-[1600px] mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
+        <!-- Header -->
+        <div class="bg-indigo-900 text-white p-6 flex justify-between items-center">
             <div>
-                <h1 class="font-bold text-lg leading-tight">canD 솔루션 개발 일정표</h1>
-                <p class="text-xs text-gray-500">자동 저장됨 • 편집 가능</p>
+                <h1 class="text-2xl font-bold">🛠️ 솔루션 기능 개발 일정표 (WBS)</h1>
+                <p class="text-indigo-200 text-sm mt-1">프로젝트 기간: 12주 (3개월) | 투입인력: 2명 (Dev A, Dev B)</p>
+            </div>
+            <div class="flex gap-4 text-sm">
+                <div class="flex items-center"><span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>Dev A (User/Front)</div>
+                <div class="flex items-center"><span class="w-3 h-3 bg-emerald-500 rounded-full mr-2"></span>Dev B (Admin/Back)</div>
+                <div class="flex items-center"><span class="w-3 h-3 bg-gray-400 rounded-full mr-2"></span>공통/QA</div>
             </div>
         </div>
-        <div class="flex gap-4 items-center">
-            <!-- Filter Dropdown -->
-            <div class="flex items-center gap-2">
-                <label for="filter-assignee" class="text-sm font-medium text-gray-700">담당자 필터:</label>
-                <select id="filter-assignee" class="text-sm border-gray-300 border rounded-md shadow-sm focus:border-green-500 focus:ring-green-500 py-1.5 px-3 bg-white">
-                    <option value="all">전체 보기</option>
-                    <option value="Dev A">Dev A (파랑)</option>
-                    <option value="Dev B">Dev B (보라)</option>
-                </select>
-            </div>
 
-            <div class="h-6 w-px bg-gray-300"></div>
-
-            <button onclick="exportToCSV()" class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                CSV 내보내기
-            </button>
-        </div>
-    </header>
-
-    <!-- Spreadsheet Area -->
-    <main class="flex-1 bg-gray-100 p-2 overflow-hidden">
-        <div id="loading-message">데이터를 불러오는 중입니다...</div>
-        
-        <div class="sheet-container rounded shadow-sm h-full hidden" id="sheet-container">
-            <table id="schedule-table">
-                <thead>
-                    <!-- Row 1: Common Headers + Month Grouping -->
+        <!-- Table Container -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs md:text-sm border-collapse">
+                <thead class="bg-gray-100 text-gray-600 font-semibold border-b-2 border-gray-200 table-header">
                     <tr>
-                        <th rowspan="2" class="w-10 bg-gray-100">#</th>
-                        <th rowspan="2" class="col-lv1">Lv1 (단계)</th>
-                        <th rowspan="2" class="col-lv2">Lv2 (기능 그룹)</th>
-                        <th rowspan="2" class="col-lv3">Lv3 (상세 업무)</th>
-                        <th rowspan="2" class="col-lv4">Lv4 (난이도)</th>
-                        <th rowspan="2" class="col-lv5">Lv5 (담당)</th>
-                        <th colspan="4" class="bg-blue-50 text-blue-900 border-r border-blue-200">1월 (기반/MVP)</th>
-                        <th colspan="4" class="bg-indigo-50 text-indigo-900 border-r border-indigo-200">2월 (핵심/심화)</th>
-                        <th colspan="4" class="bg-purple-50 text-purple-900">3월 (완성/안정화)</th>
-                    </tr>
-                    <!-- Row 2: Weeks -->
-                    <tr>
-                        <th class="bg-gray-50 text-xs">1주</th><th class="bg-gray-50 text-xs">2주</th><th class="bg-gray-50 text-xs">3주</th><th class="bg-gray-50 text-xs border-r border-blue-200">4주</th>
-                        <th class="bg-gray-50 text-xs">5주</th><th class="bg-gray-50 text-xs">6주</th><th class="bg-gray-50 text-xs">7주</th><th class="bg-gray-50 text-xs border-r border-indigo-200">8주</th>
-                        <th class="bg-gray-50 text-xs">9주</th><th class="bg-gray-50 text-xs">10주</th><th class="bg-gray-50 text-xs">11주</th><th class="bg-gray-50 text-xs">12주</th>
+                        <th class="p-3 text-left w-24 border-r">Lv1 (담당)</th>
+                        <th class="p-3 text-left w-24 border-r">Lv2 (구분)</th>
+                        <th class="p-3 text-left w-40 border-r">Lv3 (주요항목)</th>
+                        <th class="p-3 text-left min-w-[200px] border-r">Lv4 (상세내용)</th>
+                        <th class="p-3 text-center w-16 border-r">진척율</th>
+                        <!-- Weeks Header -->
+                        <th class="p-1 text-center w-8 border-r bg-indigo-50">1주</th>
+                        <th class="p-1 text-center w-8 border-r bg-indigo-50">2주</th>
+                        <th class="p-1 text-center w-8 border-r bg-indigo-50">3주</th>
+                        <th class="p-1 text-center w-8 border-r bg-indigo-50">4주</th>
+                        <th class="p-1 text-center w-8 border-r bg-red-50">5주</th>
+                        <th class="p-1 text-center w-8 border-r bg-red-50">6주</th>
+                        <th class="p-1 text-center w-8 border-r bg-red-50">7주</th>
+                        <th class="p-1 text-center w-8 border-r bg-red-50">8주</th>
+                        <th class="p-1 text-center w-8 border-r bg-red-50">9주</th>
+                        <th class="p-1 text-center w-8 border-r bg-red-50">10주</th>
+                        <th class="p-1 text-center w-8 border-r bg-gray-50">11주</th>
+                        <th class="p-1 text-center w-8 bg-gray-50">12주</th>
                     </tr>
                 </thead>
-                <tbody id="table-body" class="bg-white">
-                    <!-- Javascript will render rows here -->
+                <tbody class="divide-y divide-gray-200" id="schedule-body">
+                    <!-- Javascript will populate this -->
                 </tbody>
             </table>
         </div>
-    </main>
+    </div>
 
     <script>
-        // Source Data
-        const rawScheduleData = [
-            ["Phase 1", "공통/기반", "프로젝트 세팅 및 DB 설계", "하", "Dev A", [1,0,0,0,0,0,0,0,0,0,0,0]],
-            ["", "", "API 공통 모듈 & 인증(JWT)", "하", "Dev B", [1,0,0,0,0,0,0,0,0,0,0,0]],
-            ["", "", "좋아요/북마크 공통 모듈", "하", "Dev A", [0,0,0,1,0,0,0,0,0,0,0,0]],
-            ["Phase 1", "회원", "프로필 조회/수정 기능", "하", "Dev B", [1,0,0,0,0,0,0,0,0,0,0,0]],
-            ["", "", "마이페이지 활동 정보 조회", "하", "Dev B", [1,0,0,0,0,0,0,0,0,0,0,0]],
-            ["", "", "팔로우/언팔로우 및 목록", "하", "Dev B", [0,1,0,0,0,0,0,0,0,0,0,0]],
-            ["Phase 1", "매거진", "매거진 목록/상세 API", "하", "Dev A", [1,0,0,0,0,0,0,0,0,0,0,0]],
-            ["", "", "매거진 북마크/공유 기능", "하", "Dev A", [0,1,0,0,0,0,0,0,0,0,0,0]],
-            ["Phase 1", "홈/검색", "메인 배너/인기 콘텐츠 노출", "하", "Dev A", [1,0,0,0,0,0,0,0,0,0,0,0]],
-            ["", "", "통합 검색 (매거진, 포스트)", "하", "Dev A", [0,1,0,0,0,0,0,0,0,0,0,0]],
-            ["Phase 1", "알림/이벤트", "알림 목록 조회 (단순)", "하", "Dev B", [0,1,0,0,0,0,0,0,0,0,0,0]],
-            ["", "", "이벤트 목록/상세 페이지", "하", "Dev A", [0,0,1,0,0,0,0,0,0,0,0,0]],
-            ["", "", "이벤트 참여 신청 폼", "하", "Dev A", [0,0,1,0,0,0,0,0,0,0,0,0]],
-            ["Phase 1", "관리자", "금칙어/태그/배지 관리", "하", "Dev B", [0,0,1,0,0,0,0,0,0,0,0,0]],
-            ["", "", "공지사항 및 약관 관리", "하", "Dev B", [0,0,1,0,0,0,0,0,0,0,0,0]],
-            ["", "", "크리에이터 회원 관리", "하", "Dev B", [0,0,0,1,0,0,0,0,0,0,0,0]],
-            ["Phase 1", "콘텐츠", "리뷰/Q&A 조회 (View)", "하", "Dev A", [0,0,0,1,0,0,0,0,0,0,0,0]],
-            ["Phase 1", "배포", "1차 통합 테스트 및 MVP 배포", "-", "Dev B", [0,0,0,1,0,0,0,0,0,0,0,0]],
-            ["Phase 2", "포스트", "작성 (이미지/영상 업로드)", "상", "Dev A", [0,0,0,0,1,0,0,0,0,0,0,0]],
-            ["", "", "임시 저장 및 태그 연동", "중", "Dev A", [0,0,0,0,1,0,0,0,0,0,0,0]],
-            ["", "", "피드 알고리즘 (인기/팔로잉)", "상", "Dev A", [0,0,0,0,0,1,0,0,0,0,0,0]],
-            ["Phase 2", "메시징", "채팅 서버 구축 (Socket)", "상", "Dev B", [0,0,0,0,1,0,0,0,0,0,0,0]],
-            ["", "", "채팅방 생성/참여자 관리", "상", "Dev B", [0,0,0,0,1,0,0,0,0,0,0,0]],
-            ["", "", "실시간 메시지/Push 알림", "상", "Dev B", [0,0,0,0,0,1,0,0,0,0,0,0]],
-            ["", "", "미디어 전송/나가기 처리", "상", "Dev B", [0,0,0,0,0,1,0,0,0,0,0,0]],
-            ["Phase 2", "투표/댓글", "계층형 댓글(대댓글)", "중", "Dev A", [0,0,0,0,0,1,0,0,0,0,0,0]],
-            ["", "", "A/B 투표 생성/수정", "상", "Dev A", [0,0,0,0,0,0,1,0,0,0,0,0]],
-            ["", "", "투표 참여/실시간 집계", "상", "Dev A", [0,0,0,0,0,0,1,0,0,0,0,0]],
-            ["Phase 2", "Candy", "포인트 정책/적립/사용", "상", "Dev B", [0,0,0,0,0,0,1,0,0,0,0,0]],
-            ["", "", "포인트 이력/무결성 검증", "상", "Dev B", [0,0,0,0,0,0,1,0,0,0,0,0]],
-            ["Phase 2", "Quest", "퀘스트/트리거 생성(Admin)", "상", "Dev B", [0,0,0,0,0,0,0,1,0,0,0,0]],
-            ["", "", "사용자 행동 감지 시스템", "상", "Dev B", [0,0,0,0,0,0,0,1,0,0,0,0]],
-            ["", "", "달성 검증/보상 지급", "상", "Dev B", [0,0,0,0,0,0,0,0,1,0,0,0]],
-            ["", "", "현황 시각화/보상 UI", "중", "Dev A", [0,0,0,0,0,0,0,0,1,0,0,0]],
-            ["Phase 2", "기타", "리뷰/Q&A 답변/베스트 선정", "중", "Dev A", [0,0,0,0,0,0,0,1,0,0,0,0]],
-            ["", "", "유해 콘텐츠 신고(FE)", "중", "Dev A", [0,0,0,0,0,0,0,1,0,0,0,0]],
-            ["", "", "마이홈 (쓴글/참여 모음)", "중", "Dev A", [0,0,0,0,0,0,0,0,1,0,0,0]],
-            ["Phase 2", "관리/통계", "봇(Bot) 자동 알림 설정", "중", "Dev B", [0,0,0,0,0,0,0,0,1,0,0,0]],
-            ["", "", "인기 콘텐츠 선정 대시보드", "중", "Dev A", [0,0,0,0,0,0,0,0,0,1,0,0]],
-            ["", "", "콘텐츠 반응 통계 집계", "중", "Dev A", [0,0,0,0,0,0,0,0,0,1,0,0]],
-            ["", "", "신고 처리/자동 제재", "상", "Dev B", [0,0,0,0,0,0,0,0,0,1,0,0]],
-            ["", "", "이벤트 당첨자 추첨", "중", "Dev B", [0,0,0,0,0,0,0,0,0,1,0,0]],
-            ["Phase 2", "최적화/QA", "이미지 로딩 최적화/캐싱", "-", "Dev A", [0,0,0,0,0,0,0,0,0,0,1,0]],
-            ["", "", "UI/UX 버그 수정", "-", "Dev A", [0,0,0,0,0,0,0,0,0,0,1,0]],
-            ["", "", "대용량 쿼리 튜닝/보안", "-", "Dev B", [0,0,0,0,0,0,0,0,0,0,1,0]],
-            ["Phase 2", "최종", "최종 테스트/런칭 준비", "-", "Dev A", [0,0,0,0,0,0,0,0,0,0,0,1]],
-            ["", "", "운영 배포/모니터링", "-", "Dev B", [0,0,0,0,0,0,0,0,0,0,0,1]]
+        // Data Structure matching the logical schedule
+        const scheduleData = [
+            // Phase 1: Weeks 1-4
+            { lv1: "Dev A", lv2: "공통/회원", lv3: "공통 액션 & 온보딩", lv4: "좋아요/팔로우/북마크 (8-11), 컨텐츠 신고/삭제 (12-13), 프로필 등록 (25)", progress: 0, start: 1, duration: 1, type: "A" },
+            { lv1: "Dev B", lv2: "관리자(기초)", lv3: "기초 설정 관리", lv4: "메타데이터(태그/배지) 관리 (120-128), 메인 배너 관리 (129-131)", progress: 0, start: 1, duration: 1, type: "B" },
+            
+            { lv1: "Dev A", lv2: "마이홈", lv3: "마이페이지 조회", lv4: "활동정보, 내 컨텐츠, 팔로우 관리 (31-48), 알림 설정 UI (160)", progress: 0, start: 2, duration: 1, type: "A" },
+            { lv1: "Dev B", lv2: "관리자(회원)", lv3: "회원/제재 관리", lv4: "크리에이터 관리 (102-103), 신고/금칙어 관리 (145-149)", progress: 0, start: 2, duration: 1, type: "B" },
+            
+            { lv1: "Dev A", lv2: "조회", lv3: "콘텐츠 조회", lv4: "매거진/스토리 상세 및 목록 (50-58), 리뷰 목록 조회 (163)", progress: 0, start: 3, duration: 1, type: "A" },
+            { lv1: "Dev B", lv2: "관리자(운영)", lv3: "콘텐츠 큐레이션", lv4: "인기 콘텐츠 관리 (132-141), 신고 게시물 처리 (142-144)", progress: 0, start: 3, duration: 1, type: "B" },
+            
+            { lv1: "Dev A", lv2: "커뮤니티", lv3: "댓글 및 리뷰", lv4: "댓글/대댓글 CRUD (14-22), 리뷰 등록 (162)", progress: 0, start: 4, duration: 1, type: "A" },
+            { lv1: "Dev B", lv2: "관리자(조회)", lv3: "활동 모니터링", lv4: "투표/Q&A 내역 조회 (104-115), 관리자 알림 (161)", progress: 0, start: 4, duration: 1, type: "B" },
+
+            // Phase 2: Weeks 5-10 (Hard)
+            { lv1: "Dev A", lv2: "포스트", lv3: "멀티미디어 업로드", lv4: "포스트 CRUD + 이미지/영상 처리 (59-69), SNS 공유 (1)", progress: 0, start: 5, duration: 1, type: "A" },
+            { lv1: "Dev B", lv2: "Q&A/투표", lv3: "복합 콘텐츠 로직", lv4: "Q&A 및 A/B 투표 로직 (70-89), 포인트 정책 설계 (2-3)", progress: 0, start: 5, duration: 1, type: "B" },
+
+            { lv1: "Dev A", lv2: "메인/피드", lv3: "알고리즘 노출", lv4: "인기 콘텐츠 집계 (26-30), 개인화 포스트 목록 (59)", progress: 0, start: 6, duration: 1, type: "A" },
+            { lv1: "Dev B", lv2: "포인트", lv3: "트랜잭션 처리", lv4: "포인트 적립/사용 무결성 (6-7), 이벤트 참여 로직 (90-94)", progress: 0, start: 6, duration: 1, type: "B" },
+
+            { lv1: "Dev A", lv2: "검색", lv3: "통합 검색 엔진", lv4: "매거진/포스트/회원 통합 검색 및 필터링 (95-101)", progress: 0, start: 7, duration: 1, type: "A" },
+            { lv1: "Dev B", lv2: "배치/알림", lv3: "자동화 시스템", lv4: "이벤트 종료 배치 (4-5), 관리자 이벤트 생성 (116-119)", progress: 0, start: 7, duration: 1, type: "B" },
+
+            { lv1: "Dev A", lv2: "채팅", lv3: "채팅방 생성", lv4: "1:1/그룹 채팅방 생성 및 참여자 관리 (150-152, 155-156)", progress: 0, start: 8, duration: 1, type: "A" },
+            { lv1: "Dev B", lv2: "퀘스트", lv3: "퀘스트 엔진", lv4: "퀘스트 생성 및 수행 조건 검증 로직 (164-165)", progress: 0, start: 8, duration: 1, type: "B" },
+
+            { lv1: "Dev A", lv2: "채팅", lv3: "메시징 처리", lv4: "실시간 메시지 송수신 (Socket), 채팅 신고 (153-154, 157)", progress: 0, start: 9, duration: 1, type: "A" },
+            { lv1: "Dev B", lv2: "퀘스트", lv3: "보상 시스템", lv4: "리워드 자동 지급 (166), 커스텀 봇 연동 (158-159)", progress: 0, start: 9, duration: 1, type: "B" },
+
+            { lv1: "Dev A", lv2: "봇/마무리", lv3: "UI 폴리싱", lv4: "신규 가입 봇 UI (158), UX 개선 및 버그 수정", progress: 0, start: 10, duration: 1, type: "A" },
+            { lv1: "Dev B", lv2: "안정화", lv3: "성능 최적화", lv4: "대용량 쿼리 튜닝, 인덱싱, 배치 안정화", progress: 0, start: 10, duration: 1, type: "B" },
+
+            // Phase 3: Weeks 11-12
+            { lv1: "공통", lv2: "QA", lv3: "통합 테스트", lv4: "전체 기능 버그 헌팅 및 수정", progress: 0, start: 11, duration: 1, type: "Common" },
+            { lv1: "공통", lv2: "배포", lv3: "프로덕션 배포", lv4: "운영 환경 배포 및 모니터링 시스템 구축", progress: 0, start: 12, duration: 1, type: "Common" }
         ];
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Fill missing phases in raw data once
-            let lastPhase = "";
-            rawScheduleData.forEach(row => {
-                if (row[0] && row[0].trim() !== "") {
-                    lastPhase = row[0];
-                } else {
-                    row[0] = lastPhase;
-                }
-            });
+        const tbody = document.getElementById('schedule-body');
 
-            // Initial Render
-            renderTable('all');
+        scheduleData.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.className = index % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100';
 
-            // Event Listener for Filter
-            const filterSelect = document.getElementById('filter-assignee');
-            filterSelect.addEventListener('change', (e) => {
-                renderTable(e.target.value);
-            });
-        });
+            // Meta Columns
+            tr.innerHTML = `
+                <td class="p-3 border-r font-medium ${item.lv1.includes('Dev A') ? 'text-blue-600' : (item.lv1.includes('Dev B') ? 'text-emerald-600' : 'text-gray-500')}">${item.lv1}</td>
+                <td class="p-3 border-r text-gray-600">${item.lv2}</td>
+                <td class="p-3 border-r font-medium text-gray-800">${item.lv3}</td>
+                <td class="p-3 border-r text-gray-500 text-xs leading-relaxed">${item.lv4}</td>
+                <td class="p-3 border-r text-center text-gray-400">${item.progress}%</td>
+            `;
 
-        function renderTable(filterAssignee) {
-            try {
-                const tableBody = document.getElementById('table-body');
-                if (!tableBody) return;
-                tableBody.innerHTML = ''; // Clear existing rows
-
-                // 1. Filter Data
-                let filteredData = [];
-                if (filterAssignee === 'all') {
-                    filteredData = rawScheduleData;
-                } else {
-                    filteredData = rawScheduleData.filter(row => row[4].includes(filterAssignee));
-                }
-
-                // 2. Calculate Rowspans (on filtered data)
-                const rowspans = [];
-                let currentPhase = "";
-                let count = 0;
-                let startIndex = 0;
-
-                filteredData.forEach((row, index) => {
-                    if (row[0] !== currentPhase) {
-                        if (count > 0) rowspans[startIndex] = count;
-                        currentPhase = row[0];
-                        count = 1;
-                        startIndex = index;
-                    } else {
-                        count++;
-                    }
-                });
-                if(filteredData.length > 0) rowspans[startIndex] = count;
-
-                // 3. Render Rows
-                filteredData.forEach((row, index) => {
-                    const tr = document.createElement('tr');
+            // Gantt Columns (12 Weeks)
+            for (let w = 1; w <= 12; w++) {
+                let cellClass = "border-r p-1 text-center";
+                let content = "";
+                
+                if (w >= item.start && w < item.start + item.duration) {
+                    let colorClass = "bg-gray-400"; // Default
+                    if (item.type === "A") colorClass = "bg-blue-500 shadow-md shadow-blue-200";
+                    if (item.type === "B") colorClass = "bg-emerald-500 shadow-md shadow-emerald-200";
                     
-                    // Check if this is the last row of a phase to apply separator
-                    // Logic: Last index OR Next row has different phase
-                    const isLastOfPhase = (index === filteredData.length - 1) || (filteredData[index+1][0] !== row[0]);
-                    if (isLastOfPhase) {
-                        tr.classList.add('phase-separator');
-                    }
-
-                    // Row Num
-                    const tdNum = document.createElement('td');
-                    tdNum.className = 'row-num';
-                    tdNum.textContent = index + 1;
-                    tr.appendChild(tdNum);
-
-                    // Lv1 (Phase)
-                    if (rowspans[index]) {
-                        const td = document.createElement('td');
-                        td.textContent = row[0];
-                        td.rowSpan = rowspans[index];
-                        td.className = 'phase-cell border-b border-gray-300';
-                        td.contentEditable = "true";
-                        tr.appendChild(td);
-                    } else if (index > 0 && row[0] === filteredData[index-1][0]) {
-                        // Skip if part of span
-                    }
-
-                    // Assignee Class
-                    const assignee = row[4];
-                    let assigneeClass = "";
-                    if (assignee.includes("Dev A")) assigneeClass = "dev-a";
-                    if (assignee.includes("Dev B")) assigneeClass = "dev-b";
-
-                    // Lv2 ~ Lv5
-                    for (let i = 1; i < 5; i++) {
-                        const td = document.createElement('td');
-                        td.contentEditable = "true";
-                        td.textContent = row[i];
-                        
-                        // Styling
-                        if (i === 1) td.className = 'font-medium text-gray-900 bg-gray-50';
-                        else if (i === 3 || i === 4) {
-                            td.className = 'text-center text-gray-700';
-                            if (i === 3 && row[i] === "상") td.classList.add("text-red-600", "font-medium");
-                            if (i === 4) {
-                                if (assigneeClass === "dev-a") td.classList.add("text-blue-600", "font-medium");
-                                if (assigneeClass === "dev-b") td.classList.add("text-purple-600", "font-medium");
-                            }
-                        } else td.className = 'text-gray-700';
-
-                        // Placeholder for empty Lv2
-                        if (i === 1 && row[i] === "") td.style.backgroundColor = 'white';
-                        
-                        tr.appendChild(td);
-                    }
-
-                    // Timeline
-                    const timelineData = row[5];
-                    timelineData.forEach(isActive => {
-                        const td = document.createElement('td');
-                        td.className = 'timeline-cell ' + assigneeClass;
-                        if (isActive) {
-                            td.classList.add('active');
-                            td.textContent = '■';
-                        }
-                        td.onclick = function() {
-                            this.classList.toggle('active');
-                            this.textContent = this.classList.contains('active') ? '■' : '';
-                        };
-                        tr.appendChild(td);
-                    });
-
-                    tableBody.appendChild(tr);
-                });
-
-                // Finish
-                document.getElementById('loading-message').style.display = 'none';
-                document.getElementById('sheet-container').classList.remove('hidden');
-
-            } catch (e) {
-                console.error(e);
+                    content = `<div class="h-6 w-full rounded ${colorClass} gantt-cell" title="${item.lv3}"></div>`;
+                }
+                
+                tr.innerHTML += `<td class="${cellClass}">${content}</td>`;
             }
-        }
 
-        function exportToCSV() {
-            let csvContent = "\uFEFF";
-            const header = ["Lv1", "Lv2", "Lv3", "Lv4(난이도)", "Lv5(담당)", 
-                            "1월(1주)","1월(2주)","1월(3주)","1월(4주)",
-                            "2월(5주)","2월(6주)","2월(7주)","2월(8주)",
-                            "3월(9주)","3월(10주)","3월(11주)","3월(12주)"];
-            csvContent += header.join(",") + "\n";
-
-            const rows = document.querySelectorAll('#table-body tr');
-            let currentPhase = ""; 
-
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                let rowData = [];
-                
-                const firstDataCell = cells[1];
-                let hasPhaseCell = firstDataCell && firstDataCell.classList.contains('phase-cell');
-                let cellIndexOffset = 0;
-
-                if (hasPhaseCell) {
-                    currentPhase = firstDataCell.innerText;
-                    rowData.push(escapeCSV(currentPhase));
-                    cellIndexOffset = 2; 
-                } else {
-                    rowData.push(escapeCSV(currentPhase));
-                    cellIndexOffset = 1; 
-                }
-
-                // Lv2 ~ Lv5 (4 columns)
-                for(let i=0; i<4; i++){
-                    if (cells[cellIndexOffset + i]) {
-                        rowData.push(escapeCSV(cells[cellIndexOffset + i].innerText));
-                    } else {
-                        rowData.push("");
-                    }
-                }
-                
-                let timelineStart = hasPhaseCell ? 6 : 5;
-                
-                for(let i=timelineStart; i<cells.length; i++){
-                    rowData.push(cells[i].classList.contains('active') ? "■" : "");
-                }
-
-                csvContent += rowData.join(",") + "\n";
-            });
-
-            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", "development_schedule.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function escapeCSV(text) {
-            if (!text) return "";
-            let val = text.replace(/"/g, '""');
-            if (val.includes(',')) val = `"${val}"`;
-            return val;
-        }
+            tbody.appendChild(tr);
+        });
     </script>
 </body>
 </html>
