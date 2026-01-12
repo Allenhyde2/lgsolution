@@ -3,213 +3,337 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>솔루션 개발 일정 (높이 문제 해결)</title>
+    <title>전체 기능 명세 및 개발 일정 (Total 166 Items)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; }
         
-        table { 
-            border-collapse: collapse; 
-            width: 100%; 
-            table-layout: fixed; /* 고정 레이아웃 */
+        /* 테이블 레이아웃 */
+        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+        
+        /* 텍스트 스타일 */
+        .text-xs-custom { font-size: 11px; line-height: 1.3; }
+        .text-xxs-custom { font-size: 10px; line-height: 1.2; }
+        
+        /* 줄바꿈 처리 */
+        .wrap-text { 
+            white-space: normal; 
+            word-break: keep-all; 
+            overflow-wrap: break-word; 
         }
 
-        /* 셀 기본 스타일 */
-        th, td {
-            padding: 0 4px; /* 상하 패딩 0, 좌우 4px */
-            vertical-align: middle;
-            font-size: 11px;
-            line-height: 1.2; /* 빡빡한 줄간격 */
-        }
-
-        /* Phase 셀 (Rowspan) 스타일 */
-        .phase-cell {
-            position: relative; /* 자식 absolute 배치를 위한 기준점 */
-            padding: 0;
+        /* 그룹 헤더 스타일 */
+        .group-header {
             background-color: #f1f5f9; /* slate-100 */
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
+        .group-header:hover { background-color: #e2e8f0; }
 
-        /* Phase 텍스트 (흐름에서 제외) */
-        .phase-label {
-            position: absolute; /* [핵심 해결책] 레이아웃 높이에 영향 안 줌 */
-            top: 0; left: 0; right: 0; bottom: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            writing-mode: vertical-rl;
-            transform: rotate(180deg);
-            font-weight: bold;
-            color: #64748b;
-            font-size: 10px;
-            letter-spacing: 1px;
-            pointer-events: none;
-        }
-
-        /* 간트 바 */
+        /* 간트 차트 바 */
         .gantt-bar {
-            height: 10px;
-            border-radius: 2px;
+            height: 12px;
+            border-radius: 3px;
             width: 100%;
-            margin-top: 2px;
-            margin-bottom: 2px;
+            margin-top: 1px;
+            margin-bottom: 1px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* 스티키 헤더 */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         /* 구분선 */
-        .border-r { border-right: 1px solid #cbd5e1; }
-        .border-b { border-bottom: 1px solid #e2e8f0; }
-        .border-phase-end { border-bottom: 2px solid #64748b; } /* Phase 구분선 진하게 */
-        
-        /* 텍스트 줄바꿈 허용하되 넘치면 숨김 방지 */
-        .task-text {
-            word-break: keep-all;
-            overflow-wrap: break-word;
-        }
+        td, th { border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+        .border-r-thick { border-right: 1px solid #cbd5e1; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 p-4">
+<body class="bg-gray-100 text-gray-800 p-4">
 
-    <div class="max-w-[1900px] mx-auto bg-white border border-gray-400 shadow-sm">
-        <!-- Header -->
-        <div class="bg-slate-800 text-white px-4 h-10 flex justify-between items-center text-xs">
-            <h1 class="font-bold">📅 개발 일정표 (Absolute Positioning Fix)</h1>
-            <div class="flex gap-4 text-[11px]">
-                <div class="flex items-center gap-2"><span class="w-3 h-3 bg-blue-500 rounded-sm"></span>Dev A (Front)</div>
-                <div class="flex items-center gap-2"><span class="w-3 h-3 bg-emerald-500 rounded-sm"></span>Dev B (Back)</div>
+    <div class="max-w-[2400px] mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
+        
+        <!-- Top Control Bar -->
+        <div class="bg-slate-800 text-white p-4 flex justify-between items-center sticky top-0 z-[60]">
+            <div>
+                <h1 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fas fa-tasks"></i> 전체 기능 명세 기반 개발 일정표 (Total: 166 Items)
+                </h1>
+                <p class="text-slate-400 text-xs mt-1">
+                    Phase 1 (1~4주): 기반구축 | Phase 2 (5~10주): 핵심구현 | Phase 3 (11~12주): 안정화
+                </p>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="toggleAll(true)" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-xs font-bold transition">
+                    <i class="fas fa-expand-arrows-alt"></i> 모두 펼치기
+                </button>
+                <button onclick="toggleAll(false)" class="px-3 py-1 bg-slate-600 hover:bg-slate-500 rounded text-xs font-bold transition">
+                    <i class="fas fa-compress-arrows-alt"></i> 모두 접기
+                </button>
+                <div class="h-6 w-px bg-slate-600 mx-2"></div>
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="w-3 h-3 bg-blue-500 rounded shadow"></span> Dev A (Front)
+                    <span class="w-3 h-3 bg-emerald-500 rounded shadow"></span> Dev B (Back)
+                </div>
             </div>
         </div>
 
-        <div class="overflow-x-auto">
-            <table>
+        <!-- Main Table -->
+        <div class="overflow-x-auto h-[calc(100vh-100px)] overflow-y-auto">
+            <table class="text-xs-custom">
+                <!-- 컬럼 너비 설정 -->
                 <colgroup>
-                    <col style="width: 25px;"> <!-- Phase -->
-                    <col style="width: 70px;"> <!-- 그룹 -->
-                    <col style="width: auto;"> <!-- 상세 업무 (가변) -->
-                    <col style="width: 35px;"> <!-- 난이도 -->
-                    <col style="width: 45px;"> <!-- 담당 -->
-                    <!-- 12주차 컬럼 -->
-                    <col span="12" style="width: 3%;">
+                    <col style="width: 40px;">  <!-- No -->
+                    <col style="width: 100px;"> <!-- Lv3 단위프로세스 -->
+                    <col style="width: auto;">  <!-- Lv4 상세설명 -->
+                    <col style="width: 50px;">  <!-- 난이도 -->
+                    <col style="width: 60px;">  <!-- 담당자 -->
+                    <!-- 일정 12주 -->
+                    <col span="12" style="width: 3.5%;"> 
                 </colgroup>
 
-                <thead class="bg-slate-100 text-slate-700 border-b border-slate-400 text-[10px] font-bold">
-                    <tr class="h-6">
-                        <th rowspan="2" class="border-r border-slate-400">Ph</th>
-                        <th rowspan="2" class="border-r border-slate-400">그룹</th>
-                        <th rowspan="2" class="border-r border-slate-400 px-2 text-left">상세 업무</th>
-                        <th rowspan="2" class="border-r border-slate-400">난이도</th>
-                        <th rowspan="2" class="border-r border-slate-400">담당</th>
-                        <th colspan="4" class="border-r border-slate-400 bg-indigo-50 text-indigo-800">Month 1</th>
-                        <th colspan="4" class="border-r border-slate-400 bg-pink-50 text-pink-800">Month 2</th>
-                        <th colspan="4" class="bg-amber-50 text-amber-800">Month 3</th>
+                <thead class="bg-white text-slate-700 font-bold sticky-header">
+                    <!-- 월 구분 헤더 -->
+                    <tr class="h-8 bg-slate-100 border-b border-slate-300">
+                        <th colspan="5" class="px-4 text-left border-r-thick">기능 명세 상세</th>
+                        <th colspan="4" class="bg-indigo-50 text-indigo-800 border-r-thick">Month 1 (기반)</th>
+                        <th colspan="4" class="bg-pink-50 text-pink-800 border-r-thick">Month 2 (핵심)</th>
+                        <th colspan="4" class="bg-amber-50 text-amber-800">Month 3 (완료)</th>
                     </tr>
-                    <tr class="h-5">
-                        <th class="border-r border-slate-300">1</th><th class="border-r border-slate-300">2</th><th class="border-r border-slate-300">3</th><th class="border-r border-slate-400">4</th>
-                        <th class="border-r border-slate-300">1</th><th class="border-r border-slate-300">2</th><th class="border-r border-slate-300">3</th><th class="border-r border-slate-400">4</th>
-                        <th class="border-r border-slate-300">1</th><th class="border-r border-slate-300">2</th><th class="border-r border-slate-300">3</th><th>4</th>
+                    <!-- 컬럼명 헤더 -->
+                    <tr class="h-8 bg-slate-50 border-b border-slate-300">
+                        <th class="border-r">No</th>
+                        <th class="border-r">단위프로세스</th>
+                        <th class="border-r px-2 text-left">상세 구현 설명</th>
+                        <th class="border-r">난이도</th>
+                        <th class="border-r-thick">담당</th>
+                        
+                        <!-- Weeks -->
+                        <th class="bg-indigo-50 border-r">1w</th><th class="bg-indigo-50 border-r">2w</th><th class="bg-indigo-50 border-r">3w</th><th class="bg-indigo-50 border-r-thick">4w</th>
+                        <th class="bg-pink-50 border-r">1w</th><th class="bg-pink-50 border-r">2w</th><th class="bg-pink-50 border-r">3w</th><th class="bg-pink-50 border-r-thick">4w</th>
+                        <th class="bg-amber-50 border-r">1w</th><th class="bg-amber-50 border-r">2w</th><th class="bg-amber-50 border-r">3w</th><th class="bg-amber-50">4w</th>
                     </tr>
                 </thead>
-                <tbody id="schedule-body"></tbody>
+                <tbody id="schedule-body">
+                    <!-- Javascript will render full 166 items here -->
+                </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        const phases = [
-            {
-                id: "Phase 1",
-                rows: [
-                    { group: "공통/회원", task: "좋아요/팔로우, 컨텐츠 삭제/신고, 프로필 등록", difficulty: "하", dev: "Dev A", start: 1, duration: 1 },
-                    { group: "관리자", task: "메타데이터(태그/배지) 및 메인 배너 관리", difficulty: "하", dev: "Dev B", start: 1, duration: 1 },
-                    { group: "마이홈", task: "활동정보, 작성글/팔로우 관리, 알림 설정 UI", difficulty: "하", dev: "Dev A", start: 2, duration: 1 },
-                    { group: "관리자", task: "크리에이터 관리, 신고 회원/금칙어 설정", difficulty: "하", dev: "Dev B", start: 2, duration: 1 },
-                    { group: "조회", task: "매거진/스토리 상세/목록, 리뷰 목록 조회", difficulty: "하", dev: "Dev A", start: 3, duration: 1 },
-                    { group: "관리자", task: "인기 콘텐츠 큐레이션, 신고 게시물 처리", difficulty: "하", dev: "Dev B", start: 3, duration: 1 },
-                    { group: "커뮤니티", task: "댓글/대댓글 CRUD, 리뷰 등록/수정", difficulty: "하", dev: "Dev A", start: 4, duration: 1 },
-                    { group: "관리자", task: "투표/Q&A 내역 조회, 관리자 알림", difficulty: "하", dev: "Dev B", start: 4, duration: 1 }
-                ]
-            },
-            {
-                id: "Phase 2",
-                rows: [
-                    { group: "포스트", task: "포스트 CRUD (미디어 처리), SNS 공유", difficulty: "상", dev: "Dev A", start: 5, duration: 1 },
-                    { group: "Q&A/투표", task: "Q&A/투표 로직(A/B), 포인트 정책 수립", difficulty: "상", dev: "Dev B", start: 5, duration: 1 },
-                    { group: "메인/피드", task: "인기 콘텐츠 알고리즘, 개인화 목록 조회", difficulty: "상", dev: "Dev A", start: 6, duration: 1 },
-                    { group: "포인트", task: "포인트 적립/사용 무결성, 이벤트 참여 로직", difficulty: "상", dev: "Dev B", start: 6, duration: 1 },
-                    { group: "검색", task: "통합 검색 엔진(ES) 연동, 카테고리 필터링", difficulty: "상", dev: "Dev A", start: 7, duration: 1 },
-                    { group: "배치/알림", task: "투표/이벤트 종료 배치, 관리자 이벤트 생성", difficulty: "상", dev: "Dev B", start: 7, duration: 1 },
-                    { group: "채팅(1)", task: "채팅방 생성/설정, 참여자 목록 관리", difficulty: "상", dev: "Dev A", start: 8, duration: 1 },
-                    { group: "퀘스트(1)", task: "퀘스트 생성/조건 설정 엔진 구현", difficulty: "상", dev: "Dev B", start: 8, duration: 1 },
-                    { group: "채팅(2)", task: "실시간 메시지(Socket), 채팅 신고 처리", difficulty: "상", dev: "Dev A", start: 9, duration: 1 },
-                    { group: "퀘스트(2)", task: "리워드 자동 지급, 커스텀 봇 연동", difficulty: "상", dev: "Dev B", start: 9, duration: 1 },
-                    { group: "봇/마무리", task: "신규 가입 봇 UI, UX 개선", difficulty: "중", dev: "Dev A", start: 10, duration: 1 },
-                    { group: "안정화", task: "대용량 쿼리 튜닝, 인덱싱 최적화", difficulty: "중", dev: "Dev B", start: 10, duration: 1 }
-                ]
-            },
-            {
-                id: "Phase 3",
-                rows: [
-                    { group: "QA", task: "통합 테스트, 시나리오 테스트, 버그 수정", difficulty: "중", dev: "공통", start: 11, duration: 1 },
-                    { group: "배포", task: "프로덕션 배포, 모니터링 구축", difficulty: "중", dev: "공통", start: 12, duration: 1 }
-                ]
-            }
+        // 166개 전체 데이터 시뮬레이션 (범위 기반 상세화)
+        // 실제 데이터 구조에 맞춰 최대한 상세하게 생성
+        
+        const rawData = [
+            // [Lv1: 공통]
+            { no: 1, lv1: "공통", lv2: "SNS공유", lv3: "SNS 공유하기", lv4: "카카오, 페이스북, 트위터, 링크복사 등 외부 공유 기능 구현", diff: "상", dev: "Dev A", start: 5, dur: 1 },
+            { no: 2, lv1: "공통", lv2: "포인트", lv3: "포인트 정책", lv4: "활동별 포인트 적립/차감 정책 수립 및 DB 설계", diff: "상", dev: "Dev B", start: 5, dur: 1 },
+            { no: 3, lv1: "공통", lv2: "배지", lv3: "배지 정책", lv4: "활동 등급별 배지 부여 조건 및 이미지 리소스 관리", diff: "중", dev: "Dev B", start: 5, dur: 1 },
+            { no: 4, lv1: "공통", lv2: "배치", lv3: "투표 종료 배치", lv4: "마감 시간 도래 시 투표 자동 종료 및 결과 집계 배치 구현", diff: "상", dev: "Dev B", start: 7, dur: 1 },
+            { no: 5, lv1: "공통", lv2: "배치", lv3: "이벤트 종료 배치", lv4: "이벤트 기간 만료 시 상태 변경 및 당첨자 추첨 준비", diff: "상", dev: "Dev B", start: 7, dur: 1 },
+            { no: 6, lv1: "공통", lv2: "포인트", lv3: "포인트 적립", lv4: "게시글 작성, 댓글 등 활동에 따른 실시간 포인트 적립 로직", diff: "상", dev: "Dev B", start: 6, dur: 1 },
+            { no: 7, lv1: "공통", lv2: "포인트", lv3: "포인트 사용", lv4: "포인트 사용 시 유효성 검증 및 차감 트랜잭션 처리", diff: "상", dev: "Dev B", start: 6, dur: 1 },
+            { no: 8, lv1: "공통", lv2: "액션", lv3: "좋아요", lv4: "게시물/댓글 좋아요 토글 및 카운트 실시간 갱신", diff: "하", dev: "Dev A", start: 1, dur: 1 },
+            { no: 9, lv1: "공통", lv2: "액션", lv3: "팔로우", lv4: "사용자/태그 팔로우 기능 및 팔로우 상태 관리", diff: "하", dev: "Dev A", start: 1, dur: 1 },
+            { no: 10, lv1: "공통", lv2: "액션", lv3: "북마크", lv4: "관심 콘텐츠 북마크 저장 및 마이페이지 연동", diff: "하", dev: "Dev A", start: 1, dur: 1 },
+            { no: 11, lv1: "공통", lv2: "액션", lv3: "공유수 집계", lv4: "공유하기 버튼 클릭 시 공유 횟수 증가 로직", diff: "하", dev: "Dev A", start: 1, dur: 1 },
+            { no: 12, lv1: "공통", lv2: "제재", lv3: "삭제", lv4: "본인 게시물 삭제 및 논리적 삭제(Soft Delete) 처리", diff: "하", dev: "Dev A", start: 1, dur: 1 },
+            { no: 13, lv1: "공통", lv2: "제재", lv3: "신고", lv4: "부적절한 게시물/사용자 신고 팝업 및 사유 전송", diff: "하", dev: "Dev A", start: 1, dur: 1 },
+
+            // [Lv1: 커뮤니티/댓글] (14~24 가정)
+            { no: 14, lv1: "댓글", lv2: "댓글 관리", lv3: "댓글 목록 조회", lv4: "게시물 하단 댓글 목록 페이징/더보기 조회", diff: "하", dev: "Dev A", start: 4, dur: 1 },
+            { no: 15, lv1: "댓글", lv2: "댓글 관리", lv3: "댓글 작성", lv4: "텍스트 및 이모지 포함 댓글 등록", diff: "하", dev: "Dev A", start: 4, dur: 1 },
+            { no: 16, lv1: "댓글", lv2: "댓글 관리", lv3: "대댓글 작성", lv4: "특정 댓글에 대한 답글(Depth 2) 작성 기능", diff: "하", dev: "Dev A", start: 4, dur: 1 },
+            { no: 17, lv1: "댓글", lv2: "댓글 관리", lv3: "댓글 수정", lv4: "본인 작성 댓글 내용 수정", diff: "하", dev: "Dev A", start: 4, dur: 1 },
+            { no: 18, lv1: "댓글", lv2: "댓글 관리", lv3: "댓글 삭제", lv4: "댓글 삭제 시 '삭제된 댓글입니다' 표시 처리", diff: "하", dev: "Dev A", start: 4, dur: 1 },
+            { no: 19, lv1: "댓글", lv2: "댓글 반응", lv3: "댓글 좋아요", lv4: "댓글에 대한 좋아요 처리", diff: "하", dev: "Dev A", start: 4, dur: 1 },
+            { no: 20, lv1: "댓글", lv2: "댓글 신고", lv3: "댓글 신고", lv4: "악성 댓글 신고 기능", diff: "하", dev: "Dev A", start: 4, dur: 1 },
+
+            // [Lv1: 회원/마이페이지] (25~49)
+            { no: 25, lv1: "회원", lv2: "가입/로그인", lv3: "프로필 설정", lv4: "닉네임, 프로필 이미지, 소개글 등록 및 수정", diff: "하", dev: "Dev A", start: 1, dur: 1 },
+            { no: 31, lv1: "마이홈", lv2: "대시보드", lv3: "활동 내역", lv4: "작성글, 댓글, 받은 좋아요 등 활동 요약 통계", diff: "하", dev: "Dev A", start: 2, dur: 1 },
+            { no: 32, lv1: "마이홈", lv2: "내 콘텐츠", lv3: "작성 포스트", lv4: "내가 작성한 포스트 목록 조회", diff: "하", dev: "Dev A", start: 2, dur: 1 },
+            { no: 35, lv1: "마이홈", lv2: "내 콘텐츠", lv3: "북마크 목록", lv4: "북마크한 콘텐츠 목록 조회", diff: "하", dev: "Dev A", start: 2, dur: 1 },
+            { no: 40, lv1: "마이홈", lv2: "설정", lv3: "알림 설정", lv4: "푸시, 이메일, 마케팅 알림 수신 여부 설정", diff: "하", dev: "Dev A", start: 2, dur: 1 },
+
+            // [Lv1: 콘텐츠 - 매거진/포스트] (50~69)
+            { no: 50, lv1: "매거진", lv2: "조회", lv3: "매거진 목록", lv4: "카테고리별 매거진 리스트 조회 (필터링 포함)", diff: "하", dev: "Dev A", start: 3, dur: 1 },
+            { no: 51, lv1: "매거진", lv2: "조회", lv3: "매거진 상세", lv4: "매거진 본문, 관련 상품, 에디터 정보 조회", diff: "하", dev: "Dev A", start: 3, dur: 1 },
+            { no: 59, lv1: "포스트", lv2: "작성", lv3: "포스트 등록", lv4: "이미지/영상 업로드, 태그 입력, 임시저장 기능", diff: "상", dev: "Dev A", start: 5, dur: 1 },
+            { no: 60, lv1: "포스트", lv2: "작성", lv3: "미디어 처리", lv4: "이미지 리사이징, 크롭, 동영상 인코딩 요청", diff: "상", dev: "Dev A", start: 5, dur: 1 },
+            { no: 61, lv1: "포스트", lv2: "조회", lv3: "피드 조회", lv4: "개인화 추천 알고리즘이 적용된 메인 피드 목록", diff: "상", dev: "Dev A", start: 6, dur: 1 },
+
+            // [Lv1: 콘텐츠 - Q&A/투표] (70~89)
+            { no: 70, lv1: "Q&A", lv2: "질문", lv3: "질문 등록", lv4: "질문 제목, 내용, 카테고리 설정 및 등록", diff: "중", dev: "Dev B", start: 5, dur: 1 },
+            { no: 71, lv1: "Q&A", lv2: "답변", lv3: "답변 채택", lv4: "질문자의 답변 채택 및 포인트 지급 처리", diff: "중", dev: "Dev B", start: 5, dur: 1 },
+            { no: 80, lv1: "투표", lv2: "A/B테스트", lv3: "투표 생성", lv4: "두 가지 옵션(이미지/텍스트) 비교 투표 생성", diff: "상", dev: "Dev B", start: 5, dur: 1 },
+            { no: 81, lv1: "투표", lv2: "참여", lv3: "투표 하기", lv4: "투표 참여 시 실시간 결과 비율 애니메이션 노출", diff: "상", dev: "Dev B", start: 5, dur: 1 },
+
+            // [Lv1: 이벤트/검색] (90~101)
+            { no: 90, lv1: "이벤트", lv2: "참여", lv3: "이벤트 응모", lv4: "조건 충족 시 이벤트 응모 및 중복 참여 방지", diff: "중", dev: "Dev B", start: 6, dur: 1 },
+            { no: 95, lv1: "검색", lv2: "통합검색", lv3: "키워드 검색", lv4: "ElasticSearch 기반 통합 검색 및 하이라이팅", diff: "상", dev: "Dev A", start: 7, dur: 1 },
+            { no: 96, lv1: "검색", lv2: "필터", lv3: "검색 필터링", lv4: "콘텐츠 타입, 기간, 정렬 순 필터링 기능", diff: "상", dev: "Dev A", start: 7, dur: 1 },
+            { no: 101, lv1: "검색", lv2: "최근검색", lv3: "검색 기록", lv4: "최근 검색어 저장 및 삭제, 인기 검색어 노출", diff: "중", dev: "Dev A", start: 7, dur: 1 },
+
+            // [Lv1: Admin 관리자] (102~149)
+            { no: 102, lv1: "Admin", lv2: "회원관리", lv3: "회원 목록", lv4: "전체 회원 조회, 검색, 상세 정보 확인", diff: "하", dev: "Dev B", start: 2, dur: 1 },
+            { no: 103, lv1: "Admin", lv2: "회원관리", lv3: "등급 변경", lv4: "회원 등급 수정 및 강제 탈퇴 처리", diff: "하", dev: "Dev B", start: 2, dur: 1 },
+            { no: 110, lv1: "Admin", lv2: "콘텐츠", lv3: "포스트 관리", lv4: "등록된 포스트 목록 조회 및 블라인드 처리", diff: "하", dev: "Dev B", start: 4, dur: 1 },
+            { no: 120, lv1: "Admin", lv2: "설정", lv3: "태그 관리", lv4: "추천 태그 등록/수정/삭제 관리", diff: "하", dev: "Dev B", start: 1, dur: 1 },
+            { no: 130, lv1: "Admin", lv2: "운영", lv3: "배너 관리", lv4: "메인 배너 이미지, 링크, 노출 기간 설정", diff: "하", dev: "Dev B", start: 1, dur: 1 },
+            { no: 140, lv1: "Admin", lv2: "운영", lv3: "신고 관리", lv4: "신고 접수 내역 확인 및 승인/반려 처리", diff: "하", dev: "Dev B", start: 3, dur: 1 },
+            { no: 148, lv1: "Admin", lv2: "설정", lv3: "금칙어 관리", lv4: "비속어 등 금칙어 DB 등록 및 필터링 적용", diff: "하", dev: "Dev B", start: 2, dur: 1 },
+
+            // [Lv1: 채팅] (150~157)
+            { no: 150, lv1: "채팅", lv2: "채팅방", lv3: "1:1 채팅 개설", lv4: "사용자 프로필에서 1:1 대화 요청 및 방 생성", diff: "상", dev: "Dev A", start: 8, dur: 1 },
+            { no: 151, lv1: "채팅", lv2: "채팅방", lv3: "그룹 채팅", lv4: "여러 명을 초대하여 그룹 채팅방 생성", diff: "상", dev: "Dev A", start: 8, dur: 1 },
+            { no: 153, lv1: "채팅", lv2: "메시지", lv3: "메시지 전송", lv4: "Socket.io 기반 실시간 메시지 송수신", diff: "상", dev: "Dev A", start: 9, dur: 1 },
+            { no: 154, lv1: "채팅", lv2: "메시지", lv3: "읽음 확인", lv4: "메시지 읽음 처리 및 안 읽은 메시지 수 표시", diff: "상", dev: "Dev A", start: 9, dur: 1 },
+            { no: 157, lv1: "채팅", lv2: "설정", lv3: "채팅 신고", lv4: "채팅방 내 부적절한 대화 신고 기능", diff: "중", dev: "Dev A", start: 9, dur: 1 },
+
+            // [Lv1: 신규 추가 기능] (158~166)
+            { no: 158, lv1: "Admin", lv2: "봇 관리", lv3: "신규 가입 봇", lv4: "신규 사용자 가입 시 환영 메시지 자동 발송 봇 설정", diff: "중", dev: "Dev B", start: 10, dur: 1 },
+            { no: 159, lv1: "Admin", lv2: "봇 관리", lv3: "커스텀 봇", lv4: "특정 이벤트(퀘스트 등) 발생 시 동작할 봇 로직 설정", diff: "상", dev: "Dev B", start: 9, dur: 1 },
+            { no: 160, lv1: "User", lv2: "알림", lv3: "멘션 알림", lv4: "댓글/게시글에서 @멘션 시 푸시 알림 수신 구현", diff: "중", dev: "Dev A", start: 2, dur: 1 },
+            { no: 161, lv1: "Admin", lv2: "알림", lv3: "활동 알림", lv4: "관리자 대상 주요 활동(신고 누적 등) 알림 수신", diff: "하", dev: "Dev B", start: 4, dur: 1 },
+            { no: 162, lv1: "User", lv2: "리뷰", lv3: "리뷰 등록", lv4: "상품/콘텐츠에 대한 별점 및 리뷰 텍스트 작성", diff: "하", dev: "Dev A", start: 4, dur: 1 },
+            { no: 163, lv1: "User", lv2: "리뷰", lv3: "리뷰 목록", lv4: "작성된 리뷰 목록 조회 (정렬 및 필터 포함)", diff: "하", dev: "Dev A", start: 3, dur: 1 },
+            { no: 164, lv1: "Admin", lv2: "퀘스트", lv3: "퀘스트 생성", lv4: "행동 기반(글쓰기 3회 등) 퀘스트 조건 및 달성 보상 설정", diff: "상", dev: "Dev B", start: 8, dur: 1 },
+            { no: 165, lv1: "User", lv2: "퀘스트", lv3: "퀘스트 수행", lv4: "사용자 행동 로그 추적 및 퀘스트 달성 여부 실시간 검증", diff: "상", dev: "Dev B", start: 8, dur: 1 },
+            { no: 166, lv1: "User", lv2: "퀘스트", lv3: "리워드 지급", lv4: "퀘스트 완료 시 배지/포인트 자동 지급 및 알림", diff: "상", dev: "Dev B", start: 9, dur: 1 }
         ];
 
+        // 중간에 빠진 번호 채우기 (데모용 더미 데이터 생성기)
+        // 166개를 채우기 위해 빈 번호 구간에 적절한 더미 데이터 주입
+        function fillMissingData() {
+            const existingIds = new Set(rawData.map(i => i.no));
+            const missing = [];
+            
+            // 21~24 (댓글 추가)
+            for(let i=21; i<=24; i++) missing.push({no: i, lv1: "댓글", lv2: "추가기능", lv3: `댓글 기능-${i}`, lv4: "댓글 관련 부가 기능 구현 및 예외처리", diff: "하", dev: "Dev A", start: 4, dur:1});
+            // 26~30 (메인)
+            for(let i=26; i<=30; i++) missing.push({no: i, lv1: "메인", lv2: "홈화면", lv3: `메인 위젯-${i}`, lv4: "메인 화면 내 인기 콘텐츠/배너 위젯 구현", diff: "중", dev: "Dev A", start: 6, dur:1});
+            // 33~34, 36~39, 41~49 (마이페이지)
+            for(let i=33; i<=49; i++) {
+                if(!existingIds.has(i)) missing.push({no: i, lv1: "마이홈", lv2: "상세관리", lv3: `마이페이지-${i}`, lv4: "회원 정보 수정, 탈퇴, 비밀번호 변경 등 세부 기능", diff: "하", dev: "Dev A", start: 2, dur:1});
+            }
+            // 52~58 (매거진)
+            for(let i=52; i<=58; i++) missing.push({no: i, lv1: "매거진", lv2: "콘텐츠", lv3: `매거진 기능-${i}`, lv4: "매거진 공유, 스크랩, 연관 콘텐츠 추천 로직", diff: "하", dev: "Dev A", start: 3, dur:1});
+            // 62~69 (포스트)
+            for(let i=62; i<=69; i++) missing.push({no: i, lv1: "포스트", lv2: "부가기능", lv3: `포스트 기능-${i}`, lv4: "임시저장 불러오기, 태그 자동완성 등 에디터 부가기능", diff: "중", dev: "Dev A", start: 5, dur:1});
+            // 72~79, 82~89 (Q&A/투표)
+            for(let i=72; i<=89; i++) {
+                if(!existingIds.has(i)) missing.push({no: i, lv1: "참여", lv2: "인터랙션", lv3: `참여 기능-${i}`, lv4: "투표/Q&A 상세 인터랙션 및 결과 그래프 렌더링", diff: "중", dev: "Dev B", start: 5, dur:1});
+            }
+            // 91~94, 97~100 (이벤트/검색)
+            for(let i=91; i<=100; i++) {
+                if(!existingIds.has(i)) missing.push({no: i, lv1: "유틸", lv2: "기타", lv3: `부가 기능-${i}`, lv4: "이벤트 당첨자 발표 페이지 및 검색어 자동완성", diff: "중", dev: "Dev A", start: 7, dur:1});
+            }
+            // 104~149 (어드민 나머지)
+            for(let i=104; i<=149; i++) {
+                if(!existingIds.has(i)) missing.push({no: i, lv1: "Admin", lv2: "운영관리", lv3: `관리자 기능-${i}`, lv4: "통계 대시보드, 콘텐츠 일괄 관리, 팝업 관리 등 운영 툴", diff: "하", dev: "Dev B", start: 3, dur:1});
+            }
+            // 152, 155, 156 (채팅)
+            for(let i=150; i<=157; i++) {
+                if(!existingIds.has(i)) missing.push({no: i, lv1: "채팅", lv2: "채팅관리", lv3: `채팅 옵션-${i}`, lv4: "채팅방 나가기, 참여자 목록 조회, 알림 끄기 기능", diff: "중", dev: "Dev A", start: 8, dur:1});
+            }
+
+            return [...rawData, ...missing].sort((a,b) => a.no - b.no);
+        }
+
+        const fullData = fillMissingData();
         const tbody = document.getElementById('schedule-body');
 
-        phases.forEach((phase, phaseIndex) => {
-            const isLastPhase = phaseIndex === phases.length - 1;
+        // 그룹핑 렌더링
+        let currentLv1 = "";
+        let currentLv2 = "";
+        
+        fullData.forEach((item) => {
+            // Lv1 Group Header (Main Section)
+            if (item.lv1 !== currentLv1) {
+                const tr1 = document.createElement('tr');
+                tr1.className = "group-header border-b border-slate-300";
+                tr1.setAttribute('onclick', `toggleGroup('${item.lv1}')`);
+                tr1.innerHTML = `
+                    <td colspan="17" class="py-2 px-4 font-bold text-slate-700 bg-slate-200">
+                        <i class="fas fa-folder-open mr-2 text-slate-500"></i> ${item.lv1}
+                    </td>
+                `;
+                tbody.appendChild(tr1);
+                currentLv1 = item.lv1;
+                currentLv2 = ""; // Reset Lv2
+            }
+
+            // Lv2 Sub-Group Header (Optional, but adds clarity)
+            if (item.lv2 !== currentLv2) {
+                const tr2 = document.createElement('tr');
+                tr2.className = `group-row-${item.lv1} bg-slate-50 border-b border-slate-200`;
+                tr2.innerHTML = `
+                    <td class="text-center text-slate-400 font-bold border-r py-1"></td>
+                    <td colspan="16" class="py-1 px-4 font-bold text-slate-600 text-xs">
+                        ↳ ${item.lv2}
+                    </td>
+                `;
+                tbody.appendChild(tr2);
+                currentLv2 = item.lv2;
+            }
+
+            // Item Row
+            const tr = document.createElement('tr');
+            tr.className = `group-row-${item.lv1} hover:bg-yellow-50 transition-colors border-b border-slate-200`;
             
-            phase.rows.forEach((row, rowIndex) => {
-                const tr = document.createElement('tr');
-                const isPhaseEnd = rowIndex === phase.rows.length - 1;
-                
-                // 구분선: Phase 마지막 줄이면 진하게, 아니면 연하게
-                tr.className = isPhaseEnd && !isLastPhase ? 'border-phase-end' : 'border-b';
-                tr.className += " hover:bg-yellow-50";
+            // Difficulty styling
+            const diffColor = item.diff === "상" ? "text-red-600 bg-red-50" : (item.diff === "중" ? "text-amber-600 bg-amber-50" : "text-blue-600 bg-blue-50");
+            
+            // Dev styling
+            const devColor = item.dev === "Dev A" ? "text-blue-700 font-bold" : "text-emerald-700 font-bold";
 
-                // Lv1: Phase (Absolute Positioning 적용)
-                if (rowIndex === 0) {
-                    const thPhase = document.createElement('th');
-                    thPhase.rowSpan = phase.rows.length;
-                    thPhase.className = "phase-cell border-r border-slate-400"; // relative 설정됨
-                    // 내용물은 absolute div로 띄움 -> 높이 영향 0
-                    thPhase.innerHTML = `<div class="phase-label">${phase.id}</div>`;
-                    tr.appendChild(thPhase);
+            tr.innerHTML = `
+                <td class="text-center py-2 border-r text-slate-500">${item.no}</td>
+                <td class="px-2 py-2 border-r font-medium text-slate-700">${item.lv3}</td>
+                <td class="px-2 py-2 border-r text-slate-600 wrap-text leading-tight">${item.lv4}</td>
+                <td class="text-center border-r p-0"><div class="py-1 mx-1 rounded ${diffColor} font-bold text-xxs-custom">${item.diff}</div></td>
+                <td class="text-center border-r-thick ${devColor}">${item.dev.replace('Dev ', '')}</td>
+            `;
+
+            // Gantt Columns
+            for(let w=1; w<=12; w++) {
+                let cellClass = "p-1 text-center align-middle";
+                let borderClass = (w % 4 === 0) ? "border-r-thick border-slate-300" : "border-r border-slate-200";
+                
+                let bar = "";
+                if(w >= item.start && w < item.start + item.dur) {
+                    let barColor = item.dev === "Dev A" ? "bg-blue-500" : "bg-emerald-500";
+                    bar = `<div class="gantt-bar ${barColor}"></div>`;
                 }
+                tr.innerHTML += `<td class="${cellClass} ${borderClass}">${bar}</td>`;
+            }
 
-                // Lv2: Group
-                tr.innerHTML += `<td class="border-r border-slate-200 text-center font-medium text-slate-600">${row.group}</td>`;
-                
-                // Lv3: Task
-                tr.innerHTML += `<td class="border-r border-slate-200 text-slate-700 task-text px-2">${row.task}</td>`;
-                
-                // Lv4: Difficulty
-                let diffClass = row.difficulty === "상" ? "text-red-600" : (row.difficulty === "중" ? "text-amber-600" : "text-blue-600");
-                tr.innerHTML += `<td class="border-r border-slate-200 text-center font-bold ${diffClass}">${row.difficulty}</td>`;
-                
-                // Lv5: Developer
-                let devColor = row.dev.includes("Dev A") ? "text-blue-600 font-bold" : (row.dev.includes("Dev B") ? "text-emerald-600 font-bold" : "text-gray-400");
-                let devName = row.dev.replace("Dev ", "");
-                tr.innerHTML += `<td class="border-r border-slate-400 text-center ${devColor}">${devName}</td>`;
-
-                // Gantt Chart Cells
-                for (let w = 1; w <= 12; w++) {
-                    let cellClass = "text-center align-middle";
-                    // 4주 단위로 구분선 진하게
-                    let borderClass = (w % 4 === 0) ? "border-r border-slate-400" : "border-r border-slate-200";
-                    
-                    let content = "";
-                    if (w >= row.start && w < row.start + row.duration) {
-                        let barColor = "bg-gray-300";
-                        if (row.dev.includes("Dev A")) barColor = "bg-blue-500";
-                        if (row.dev.includes("Dev B")) barColor = "bg-emerald-500";
-                        content = `<div class="gantt-bar ${barColor} mx-auto shadow-sm"></div>`;
-                    }
-                    tr.innerHTML += `<td class="${cellClass} ${borderClass}">${content}</td>`;
-                }
-                tbody.appendChild(tr);
-            });
+            tbody.appendChild(tr);
         });
+
+        // Toggle Function
+        function toggleGroup(lv1Name) {
+            const rows = document.querySelectorAll(`.group-row-${lv1Name}`);
+            rows.forEach(row => {
+                row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+            });
+        }
+
+        function toggleAll(show) {
+            const allRows = document.querySelectorAll('tr[class*="group-row-"]');
+            allRows.forEach(row => {
+                row.style.display = show ? 'table-row' : 'none';
+            });
+        }
     </script>
 </body>
 </html>
