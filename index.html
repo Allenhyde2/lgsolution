@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>솔루션 제공 기능 목록표 & WBS (Total 166)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS with Style Support (xlsx-js-style) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; }
@@ -15,9 +17,9 @@
             border-right: 1px solid #cbd5e1; 
             border-bottom: 1px solid #cbd5e1; 
         }
-        th { border-top: 1px solid #cbd5e1; border-left: 1px solid #cbd5e1;} /* 헤더 테두리 보강 */
+        th { border-top: 1px solid #cbd5e1; border-left: 1px solid #cbd5e1;}
         
-        /* 헤더 고정 (Sticky Header) */
+        /* 헤더 고정 */
         thead { position: sticky; top: 0; z-index: 30; }
         
         /* 계층별 배경색 */
@@ -45,19 +47,28 @@
             <div class="flex justify-between items-start mb-4">
                 <div>
                     <h1 class="text-xl font-bold flex items-center gap-2">
-                        <span>📅</span> 솔루션 구축 WBS
+                        <span>📅</span> 솔루션 구축 WBS (5개월 프로젝트)
                     </h1>
-                    <p class="text-sm text-slate-400 mt-1">3mo 개발 일정 설정</p>
+                    <p class="text-sm text-slate-400 mt-1">총 20주 일정 (Phase 1: 1~8주 / Phase 2: 6~20주)</p>
                 </div>
-                <!-- 범례 -->
-                <div class="text-xs text-slate-400 text-right flex gap-4 bg-slate-700 px-4 py-2 rounded-lg items-center">
-                    <div class="flex items-center gap-2">
-                        <span class="w-3 h-3 rounded bg-blue-500 block"></span>
-                        <span>Phase 1 (하)</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-3 h-3 rounded bg-indigo-500 block"></span>
-                        <span>Phase 2 (중/상)</span>
+                
+                <div class="flex flex-col items-end gap-2">
+                    <!-- 엑셀 다운로드 버튼 -->
+                    <button onclick="downloadExcel()" class="bg-green-600 hover:bg-green-500 text-white text-sm font-bold py-2 px-4 rounded inline-flex items-center transition shadow-sm border border-green-700">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        엑셀 다운로드 (5개월 WBS 포함)
+                    </button>
+
+                    <!-- 범례 -->
+                    <div class="text-xs text-slate-400 text-right flex gap-4 bg-slate-700 px-4 py-2 rounded-lg items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded bg-blue-500 block"></span>
+                            <span>Phase 1 (하)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded bg-indigo-500 block"></span>
+                            <span>Phase 2 (중/상)</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -99,7 +110,7 @@
 
         <!-- Table Container -->
         <div class="overflow-auto flex-1 bg-white relative">
-            <table class="text-xs w-full min-w-[1600px]">
+            <table id="wbs-table" class="text-xs w-full min-w-[2000px]">
                 <thead class="bg-slate-100 text-slate-700 font-bold text-center">
                     <!-- 헤더 1열: 기본정보 + 월(Month) -->
                     <tr class="h-8">
@@ -112,28 +123,40 @@
                         <th rowspan="2" class="w-20 bg-slate-100 text-blue-800">담당자</th>
                         <th rowspan="2" class="w-16 bg-slate-100">난이도</th>
                         
-                        <!-- WBS Month Header -->
+                        <!-- WBS Month Header (5 Months) -->
                         <th colspan="4" class="bg-blue-50 text-blue-700 border-l-2 border-l-slate-300">1개월차</th>
                         <th colspan="4" class="bg-indigo-50 text-indigo-700 border-l-2 border-l-slate-300">2개월차</th>
                         <th colspan="4" class="bg-purple-50 text-purple-700 border-l-2 border-l-slate-300">3개월차</th>
+                        <th colspan="4" class="bg-emerald-50 text-emerald-700 border-l-2 border-l-slate-300">4개월차</th>
+                        <th colspan="4" class="bg-rose-50 text-rose-700 border-l-2 border-l-slate-300">5개월차</th>
                     </tr>
                     <!-- 헤더 2열: 주차(Week) -->
                     <tr class="h-6 text-[10px] text-slate-500">
-                        <!-- Month 1 Weeks -->
+                        <!-- Month 1 -->
                         <th class="w-8 bg-blue-50/50 border-l-2 border-l-slate-300">1주</th>
                         <th class="w-8 bg-blue-50/50">2주</th>
                         <th class="w-8 bg-blue-50/50">3주</th>
                         <th class="w-8 bg-blue-50/50">4주</th>
-                        <!-- Month 2 Weeks -->
+                        <!-- Month 2 -->
                         <th class="w-8 bg-indigo-50/50 border-l-2 border-l-slate-300">5주</th>
                         <th class="w-8 bg-indigo-50/50">6주</th>
                         <th class="w-8 bg-indigo-50/50">7주</th>
                         <th class="w-8 bg-indigo-50/50">8주</th>
-                        <!-- Month 3 Weeks -->
+                        <!-- Month 3 -->
                         <th class="w-8 bg-purple-50/50 border-l-2 border-l-slate-300">9주</th>
                         <th class="w-8 bg-purple-50/50">10주</th>
                         <th class="w-8 bg-purple-50/50">11주</th>
                         <th class="w-8 bg-purple-50/50">12주</th>
+                        <!-- Month 4 -->
+                        <th class="w-8 bg-emerald-50/50 border-l-2 border-l-slate-300">13주</th>
+                        <th class="w-8 bg-emerald-50/50">14주</th>
+                        <th class="w-8 bg-emerald-50/50">15주</th>
+                        <th class="w-8 bg-emerald-50/50">16주</th>
+                        <!-- Month 5 -->
+                        <th class="w-8 bg-rose-50/50 border-l-2 border-l-slate-300">17주</th>
+                        <th class="w-8 bg-rose-50/50">18주</th>
+                        <th class="w-8 bg-rose-50/50">19주</th>
+                        <th class="w-8 bg-rose-50/50">20주</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -145,7 +168,7 @@
         <!-- Footer -->
         <div class="bg-slate-50 p-3 text-xs flex justify-between text-slate-500 border-t border-slate-300 shrink-0">
             <span>* 좌측 테이블은 Lv1~Lv3 기준으로 자동 병합됩니다.</span>
-            <span>* 개발 A: 사용자 기능 위주 / 개발 B: 관리자 및 시스템 코어, 마이페이지 기능 배정</span>
+            <span>* 5개월(20주) 일정으로 확장되었습니다.</span>
         </div>
     </div>
 
@@ -320,6 +343,7 @@
         ];
 
         const tableBody = document.getElementById('tableBody');
+        const TOTAL_WEEKS = 20; // 5 months * 4 weeks
 
         // 담당자 배정 로직 (Rule Based)
         function assignDeveloper(item) {
@@ -461,26 +485,30 @@
             return processed;
         }
 
-        // 일정 시뮬레이션 함수
+        // 일정 시뮬레이션 함수 (20주 기준)
         function simulateSchedule(item, index) {
             let start, duration;
             const seed = (item.no * 7 + index * 13) % 100;
             
             if (item.difficulty === '하') {
-                start = (seed % 6) + 1; 
-                duration = (seed % 3) + 1; 
+                // Phase 1: 1~8주
+                start = (seed % 8) + 1; 
+                duration = (seed % 4) + 1; 
             } else {
-                start = (seed % 7) + 5; 
-                duration = (seed % 4) + 2;
+                // Phase 2: 6~20주
+                start = (seed % 14) + 6; 
+                duration = (seed % 6) + 2;
             }
-            if (start + duration > 13) duration = 13 - start;
+            
+            if (start + duration > 20) duration = 20 - start + 1;
+            if (duration < 1) duration = 1;
+
             return { start, duration };
         }
 
         function renderTable(data) {
             tableBody.innerHTML = '';
             
-            // 통계 업데이트 호출
             updateDashboard(data);
 
             let phase1 = [];
@@ -488,7 +516,7 @@
 
             data.forEach(item => {
                 const diff = calculateDifficulty(item);
-                const dev = assignDeveloper(item); // 담당자 배정
+                const dev = assignDeveloper(item);
                 const itemWithMeta = { ...item, difficulty: diff, assignee: dev };
 
                 if (diff === '하') phase1.push(itemWithMeta);
@@ -529,8 +557,8 @@
                         </td>
                     `;
 
-                    // WBS Cells (1~12주)
-                    for (let w = 1; w <= 12; w++) {
+                    // WBS Cells (1~20주)
+                    for (let w = 1; w <= TOTAL_WEEKS; w++) {
                         let cellContent = "";
                         let cellClass = "wbs-cell border-r border-slate-100 wbs-grid-line";
                         
@@ -551,7 +579,7 @@
             // Phase 1 Header
             if (phase1.length > 0) {
                 const headerRow1 = document.createElement('tr');
-                headerRow1.innerHTML = `<td colspan="20" class="p-2 font-bold text-sm text-white bg-blue-600 text-left pl-5 sticky left-0 z-10">🚀 Phase 1 - 핵심 기반 구축 (난이도: 하) - ${phase1.length}건</td>`;
+                headerRow1.innerHTML = `<td colspan="28" class="p-2 font-bold text-sm text-white bg-blue-600 text-left pl-5 sticky left-0 z-10">🚀 Phase 1 - 핵심 기반 구축 (난이도: 하) - ${phase1.length}건</td>`;
                 tableBody.appendChild(headerRow1);
                 renderRows(phase1);
             }
@@ -559,14 +587,71 @@
             // Phase 2 Header
             if (phase2.length > 0) {
                 const spacerRow = document.createElement('tr');
-                spacerRow.innerHTML = `<td colspan="20" class="h-4 bg-slate-200 border-none sticky left-0 z-10"></td>`;
+                spacerRow.innerHTML = `<td colspan="28" class="h-4 bg-slate-200 border-none sticky left-0 z-10"></td>`;
                 tableBody.appendChild(spacerRow);
 
                 const headerRow2 = document.createElement('tr');
-                headerRow2.innerHTML = `<td colspan="20" class="p-2 font-bold text-sm text-white bg-indigo-600 text-left pl-5 sticky left-0 z-10">⚡ Phase 2 - 서비스 고도화 (난이도: 중/상) - ${phase2.length}건</td>`;
+                headerRow2.innerHTML = `<td colspan="28" class="p-2 font-bold text-sm text-white bg-indigo-600 text-left pl-5 sticky left-0 z-10">⚡ Phase 2 - 서비스 고도화 (난이도: 중/상) - ${phase2.length}건</td>`;
                 tableBody.appendChild(headerRow2);
                 renderRows(phase2);
             }
+        }
+
+        // Excel Download Function (Revised for Colors & 5 Months)
+        function downloadExcel() {
+            const table = document.getElementById("wbs-table");
+            const wb = XLSX.utils.table_to_book(table, {sheet: "WBS"});
+            const ws = wb.Sheets["WBS"];
+
+            const colors = {
+                'blue': '60A5FA',   // Tailwind blue-400
+                'indigo_light': '818CF8', // Tailwind indigo-400
+                'indigo_dark': '4F46E5'   // Tailwind indigo-600
+            };
+
+            const rows = table.querySelectorAll('tbody tr');
+            const headerOffset = 2; // The table header has 2 rows
+
+            rows.forEach((row, rowIndex) => {
+                const cells = row.querySelectorAll('td');
+                // Phase headers have colspan=28, so length is 1. Skip them.
+                if (cells.length < TOTAL_WEEKS) return;
+
+                const wbsStartIndex = cells.length - TOTAL_WEEKS;
+                
+                for (let i = 0; i < TOTAL_WEEKS; i++) {
+                    const cellIndex = wbsStartIndex + i;
+                    const cell = cells[cellIndex];
+                    const bar = cell ? cell.querySelector('.wbs-bar') : null;
+                    
+                    if (bar) {
+                        let color = colors.blue; 
+                        if (bar.classList.contains('bg-indigo-600')) {
+                            color = colors.indigo_dark;
+                        } else if (bar.classList.contains('bg-indigo-400')) {
+                            color = colors.indigo_light;
+                        }
+                        
+                        // Excel Column Index (WBS starts at Column 8 'I')
+                        const excelColIndex = 8 + i; 
+                        const excelRowIndex = headerOffset + rowIndex;
+                        
+                        const cellRef = XLSX.utils.encode_cell({c: excelColIndex, r: excelRowIndex});
+                        
+                        // Ensure cell exists
+                        if (!ws[cellRef]) ws[cellRef] = { t: 's', v: ' ' }; 
+                        
+                        // Apply Fill Style with patternType
+                        if (!ws[cellRef].s) ws[cellRef].s = {};
+                        ws[cellRef].s.fill = { 
+                            patternType: 'solid',
+                            fgColor: { rgb: color } 
+                        };
+                    }
+                }
+            });
+            
+            XLSX.writeFile(wb, "솔루션_WBS_및_기능명세_5개월.xlsx");
         }
 
         renderTable(rawData);
